@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.sqlite
+*.sqlite-*
+AutoNext-public-market-local.zip
+.library-runway/
+outputs/

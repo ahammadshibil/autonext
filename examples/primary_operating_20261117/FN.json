@@ -1,0 +1,100 @@
+{
+  "security": {
+    "company": "Fabrinet",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "id": "NYSE:FN:COMMON",
+    "sector": "photonics",
+    "share_class": "common",
+    "ticker": "FN"
+  },
+  "sources": [
+    {
+      "id": "fn-release-2026-11-02-review20261117",
+      "title": "FN quarterly earnings release 2026-11-02",
+      "locator": "https://www.sec.gov/Archives/edgar/data/1408710/000140871026000034/fn-20261102xex991q127.htm",
+      "published_at": "2026-11-02T23:59:59Z",
+      "captured_at": "2026-11-17T05:26:47.971016+00:00",
+      "visibility": "public",
+      "excerpt": "Manual paraphrase: FY2027 Q1 revenue USD 1.4745e+09; GAAP diluted EPS USD 2.86; issuer-defined non-GAAP diluted EPS USD 4.34. Management FY2027 Q2 revenue range USD 1.6e+09 to 1.65e+09, non-GAAP diluted EPS 4.77 to 4.92. Guidance uses approximately 36.2m diluted shares, not current shares outstanding. Non-GAAP exclusions differ by issuer.",
+      "publication_precision": "day",
+      "timestamp_note": "Publication date conservatively assigned end of stated date UTC. Not suitable for intraday analysis. Web text manually reviewed; not a full document archive."
+    }
+  ],
+  "claims": [],
+  "expectations": [
+    {
+      "id": "fn-release-2026-11-02-review20261117-0",
+      "known_at": "2026-11-02T23:59:59Z",
+      "source_ids": [
+        "fn-release-2026-11-02-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "revenue",
+      "period": "FY2027 Q1",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 1474500000.0
+    },
+    {
+      "id": "fn-release-2026-11-02-review20261117-1",
+      "known_at": "2026-11-02T23:59:59Z",
+      "source_ids": [
+        "fn-release-2026-11-02-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "FY2027 Q1",
+      "basis": "GAAP diluted",
+      "unit": "USD/share",
+      "value": 2.86
+    },
+    {
+      "id": "fn-release-2026-11-02-review20261117-2",
+      "known_at": "2026-11-02T23:59:59Z",
+      "source_ids": [
+        "fn-release-2026-11-02-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "FY2027 Q1",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 4.34
+    },
+    {
+      "id": "fn-release-2026-11-02-review20261117-3",
+      "known_at": "2026-11-02T23:59:59Z",
+      "source_ids": [
+        "fn-release-2026-11-02-review20261117"
+      ],
+      "kind": "management_guidance",
+      "metric": "revenue",
+      "period": "FY2027 Q2",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 1625000000.0,
+      "low": 1600000000.0,
+      "high": 1650000000.0,
+      "normalization_note": "Range value is calculated midpoint, not a point forecast."
+    },
+    {
+      "id": "fn-release-2026-11-02-review20261117-4",
+      "known_at": "2026-11-02T23:59:59Z",
+      "source_ids": [
+        "fn-release-2026-11-02-review20261117"
+      ],
+      "kind": "management_guidance",
+      "metric": "EPS",
+      "period": "FY2027 Q2",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 4.845,
+      "low": 4.77,
+      "high": 4.92,
+      "normalization_note": "Range value is calculated midpoint, not a point forecast."
+    }
+  ],
+  "catalysts": [],
+  "valuations": []
+}

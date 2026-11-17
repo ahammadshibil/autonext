@@ -1,0 +1,27 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-and-workflow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile source
+        run: python -m compileall -q .
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+      - name: Exercise synthetic CLI
+        run: |
+          python autonext.py --db /tmp/autonext.sqlite ingest examples/photonics_demo.json
+          python autonext.py --db /tmp/autonext.sqlite run DEMO:PHOTON:COMMON --as-of 2025-12-31T23:59:59Z --format json > /tmp/run.json
+          python -c "import json; d=json.load(open('/tmp/run.json')); assert d['security']['ticker']=='DEMO'"

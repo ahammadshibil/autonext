@@ -1,0 +1,126 @@
+{
+  "security": {
+    "id": "DEMO:PHOTON:COMMON",
+    "company": "Fictional Photonics (synthetic example)",
+    "ticker": "DEMO",
+    "exchange": "DEMO",
+    "share_class": "common",
+    "currency": "USD",
+    "sector": "photonics"
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "title": "SYNTHETIC photonics demonstration, not a real issuer",
+      "locator": "fixture://fictional-photonics/s1",
+      "visibility": "public",
+      "published_at": "2025-01-01T00:00:00Z",
+      "captured_at": "2025-01-01T00:00:00Z",
+      "excerpt": "Synthetic management guidance: FY2025 revenue 100 million USD. One customer qualification is in progress. All values are invented to test software."
+    },
+    {
+      "id": "s2",
+      "title": "SYNTHETIC photonics demonstration, not a real issuer",
+      "locator": "fixture://fictional-photonics/s2",
+      "visibility": "public",
+      "published_at": "2026-02-01T00:00:00Z",
+      "captured_at": "2026-02-01T00:00:00Z",
+      "excerpt": "Synthetic FY2025 result: revenue 90 million USD. Qualification completed; no volume-revenue evidence."
+    },
+    {
+      "id": "price",
+      "title": "SYNTHETIC photonics demonstration, not a real issuer",
+      "locator": "fixture://fictional-photonics/price",
+      "visibility": "public",
+      "published_at": "2025-01-01T00:00:00Z",
+      "captured_at": "2025-01-01T00:00:00Z",
+      "excerpt": "Synthetic snapshot: price USD 10; 100m shares; USD 50m cash; USD 20m debt. The valuation assumptions are analyst scenarios, not management guidance."
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "known_at": "2025-01-01T00:00:00Z",
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Customer qualification is in progress; this is not yet volume revenue.",
+      "status": "supported",
+      "stage": "customer_qualification"
+    },
+    {
+      "id": "c2",
+      "known_at": "2026-02-01T00:00:00Z",
+      "source_ids": [
+        "s2"
+      ],
+      "text": "Qualification is complete, but the commercial ramp is still unproven.",
+      "status": "supported",
+      "stage": "customer_qualification"
+    }
+  ],
+  "expectations": [
+    {
+      "id": "g1",
+      "known_at": "2025-01-01T00:00:00Z",
+      "source_ids": [
+        "s1"
+      ],
+      "kind": "management_guidance",
+      "metric": "revenue",
+      "period": "FY2025",
+      "unit": "USD",
+      "basis": "GAAP consolidated",
+      "value": 100000000
+    },
+    {
+      "id": "a1",
+      "known_at": "2026-02-01T00:00:00Z",
+      "source_ids": [
+        "s2"
+      ],
+      "kind": "observed_result",
+      "metric": "revenue",
+      "period": "FY2025",
+      "unit": "USD",
+      "basis": "GAAP consolidated",
+      "value": 90000000
+    }
+  ],
+  "valuations": [
+    {
+      "id": "v1",
+      "known_at": "2025-01-01T00:00:00Z",
+      "source_ids": [
+        "price"
+      ],
+      "price": 10,
+      "shares": 100000000,
+      "cash": 50000000,
+      "debt": 20000000,
+      "years": 5,
+      "discount_rate": 0.12,
+      "terminal_revenue_multiple": 5,
+      "future_shares": 120000000,
+      "future_cash": 30000000,
+      "future_debt": 20000000,
+      "units": "currency_units_and_absolute_shares",
+      "assumptions": "ILLUSTRATIVE ONLY: 20% share count increase, 5x terminal EV/revenue, 12% discount rate, no interim distributions. No actual issuer or investment conclusion."
+    }
+  ],
+  "catalysts": [
+    {
+      "id": "k1",
+      "known_at": "2025-01-01T00:00:00Z",
+      "source_ids": [
+        "s1"
+      ],
+      "expected_at": "2026-02-01T00:00:00Z",
+      "event": "Synthetic qualification update",
+      "uncertainty": "Can the product satisfy customer qualification?",
+      "supports": "Documented completion against customer requirements.",
+      "weakens": "Delay, failure or reduced performance scope.",
+      "still_unresolved": "Order volume, pricing, gross margin and cash required for scale."
+    }
+  ]
+}

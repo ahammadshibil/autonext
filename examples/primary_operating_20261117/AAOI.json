@@ -1,0 +1,100 @@
+{
+  "security": {
+    "company": "APPLIED OPTOELECTRONICS, INC.",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "id": "NASDAQ:AAOI:COMMON",
+    "sector": "photonics",
+    "share_class": "common",
+    "ticker": "AAOI"
+  },
+  "sources": [
+    {
+      "id": "aaoi-release-2026-11-05-review20261117",
+      "title": "AAOI quarterly earnings release 2026-11-05",
+      "locator": "https://investors.ao-inc.com/2026-11-05-Applied-Optoelectronics-Reports-Third-Quarter-2026-Results",
+      "published_at": "2026-11-05T23:59:59Z",
+      "captured_at": "2026-11-17T05:26:47.971016+00:00",
+      "visibility": "public",
+      "excerpt": "Manual paraphrase: CY2026 Q3 revenue USD 2.699e+08; GAAP basic EPS USD 0.07; issuer-defined non-GAAP diluted EPS USD 0.17. Management CY2026 Q4 revenue range USD 3.85e+08 to 4.2e+08, non-GAAP diluted EPS 0.48 to 0.63. Headline GAAP EPS is basic; non-GAAP EPS is diluted. Q4 guidance uses approximately 96m shares. US capacity expansion faces power/construction delays.",
+      "publication_precision": "day",
+      "timestamp_note": "Publication date conservatively assigned end of stated date UTC. Not suitable for intraday analysis. Web text manually reviewed; not a full document archive."
+    }
+  ],
+  "claims": [],
+  "expectations": [
+    {
+      "id": "aaoi-release-2026-11-05-review20261117-0",
+      "known_at": "2026-11-05T23:59:59Z",
+      "source_ids": [
+        "aaoi-release-2026-11-05-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "revenue",
+      "period": "CY2026 Q3",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 269900000.0
+    },
+    {
+      "id": "aaoi-release-2026-11-05-review20261117-1",
+      "known_at": "2026-11-05T23:59:59Z",
+      "source_ids": [
+        "aaoi-release-2026-11-05-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "CY2026 Q3",
+      "basis": "GAAP basic",
+      "unit": "USD/share",
+      "value": 0.07
+    },
+    {
+      "id": "aaoi-release-2026-11-05-review20261117-2",
+      "known_at": "2026-11-05T23:59:59Z",
+      "source_ids": [
+        "aaoi-release-2026-11-05-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "CY2026 Q3",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 0.17
+    },
+    {
+      "id": "aaoi-release-2026-11-05-review20261117-3",
+      "known_at": "2026-11-05T23:59:59Z",
+      "source_ids": [
+        "aaoi-release-2026-11-05-review20261117"
+      ],
+      "kind": "management_guidance",
+      "metric": "revenue",
+      "period": "CY2026 Q4",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 402500000.0,
+      "low": 385000000.0,
+      "high": 420000000.0,
+      "normalization_note": "Range value is calculated midpoint, not a point forecast."
+    },
+    {
+      "id": "aaoi-release-2026-11-05-review20261117-4",
+      "known_at": "2026-11-05T23:59:59Z",
+      "source_ids": [
+        "aaoi-release-2026-11-05-review20261117"
+      ],
+      "kind": "management_guidance",
+      "metric": "EPS",
+      "period": "CY2026 Q4",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 0.5549999999999999,
+      "low": 0.48,
+      "high": 0.63,
+      "normalization_note": "Range value is calculated midpoint, not a point forecast."
+    }
+  ],
+  "catalysts": [],
+  "valuations": []
+}

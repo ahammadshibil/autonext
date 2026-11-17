@@ -1,0 +1,253 @@
+{
+  "schema_version": "autonext-sector/1",
+  "question": "Who controls a difficult-to-replace bottleneck, and who captures its economics?",
+  "sources": [
+    {
+      "id": "cohr",
+      "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000020/iivi-20260630.htm",
+      "locator": "FY2026 10-K, Business and competition/risk factors",
+      "summary": "Coherent describes components and transceivers, InP expansion, qualification requirements and competing architectures.",
+      "source_type": "primary_company_disclosure",
+      "published_at": null,
+      "availability_policy": "capture_only_publication_time_not_verified",
+      "captured_at": "2026-11-16T03:05:57.533099+00:00"
+    },
+    {
+      "id": "lite",
+      "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+      "locator": "EML product description",
+      "summary": "Lumentum describes 100G/200G EMLs, integrated laser/modulator and high-volume manufacturing. Company positioning, not independent superiority evidence.",
+      "source_type": "primary_company_disclosure",
+      "published_at": null,
+      "availability_policy": "capture_only_publication_time_not_verified",
+      "captured_at": "2026-11-16T03:05:57.533133+00:00"
+    },
+    {
+      "id": "fn",
+      "url": "https://fabrinet.com/services/optical-computing",
+      "locator": "Optical computing services",
+      "summary": "Fabrinet lists wafer processing, alignment, packaging, fiber connections and system testing.",
+      "source_type": "primary_company_disclosure",
+      "published_at": null,
+      "availability_policy": "capture_only_publication_time_not_verified",
+      "captured_at": "2026-11-16T03:05:57.533139+00:00"
+    },
+    {
+      "id": "aaoi",
+      "url": "https://newsroom.ao-inc.com/latest-news/why-vertical-integration-is-becoming-critical-in-optical-supply-chains/",
+      "locator": "Vertical integration Q&A",
+      "summary": "AOI explains bringing laser fabrication, optical assembly and module production together. Company assertion, not proof of scarce capacity.",
+      "source_type": "primary_company_disclosure",
+      "published_at": null,
+      "availability_policy": "capture_only_publication_time_not_verified",
+      "captured_at": "2026-11-16T03:05:57.533144+00:00"
+    },
+    {
+      "id": "ipgp",
+      "url": "https://www.sec.gov/Archives/edgar/data/1111928/000111192826000040/ipgp-20251231.htm",
+      "locator": "FY2025 10-K, Business, Competition, sales by application",
+      "summary": "IPG reports 85.7% of 2025 revenue from materials processing and competition from laser suppliers and non-laser methods.",
+      "source_type": "primary_company_disclosure",
+      "published_at": null,
+      "availability_policy": "capture_only_publication_time_not_verified",
+      "captured_at": "2026-11-16T03:05:57.533148+00:00"
+    },
+    {
+      "id": "cpo",
+      "url": "https://www.broadcom.com/products/fiber-optic-modules-components/co-packaged-optics",
+      "locator": "CPO product architecture",
+      "summary": "Broadcom describes switch-integrated optical engines and a separate pluggable laser source.",
+      "source_type": "primary_company_disclosure",
+      "published_at": null,
+      "availability_policy": "capture_only_publication_time_not_verified",
+      "captured_at": "2026-11-16T03:05:57.533153+00:00"
+    }
+  ],
+  "companies": [
+    {
+      "ticker": "COHR",
+      "cohorts": [
+        "datacenter-components",
+        "datacenter-modules",
+        "industrial-lasers"
+      ],
+      "role": "Lasers, components and finished transceivers; broad vertical integration.",
+      "source_ids": [
+        "cohr"
+      ],
+      "constraint": "Qualified capacity and yields, not wafer diameter alone.",
+      "proof_needed": "Document qualified available capacity, customer alternatives and segment margin/FCF capture.",
+      "alternatives": "Other qualified component/module vendors; architectural move to CPO.",
+      "falsifier": "Capacity additions or buyer integration can compete away scarcity.",
+      "bottleneck_evidence": {
+        "physical_difficulty": "unknown",
+        "qualified_supplier_scarcity": "unknown",
+        "switching_cost": "unknown",
+        "economic_capture": "unknown",
+        "durability": "unknown"
+      },
+      "verdict": "candidate_for_research_not_proven_monopoly"
+    },
+    {
+      "ticker": "LITE",
+      "cohorts": [
+        "datacenter-components"
+      ],
+      "role": "Laser/component exposure; EML product evidence is stronger here than broad system comparisons.",
+      "source_ids": [
+        "lite"
+      ],
+      "constraint": "High-speed optical signal quality at production yield.",
+      "proof_needed": "Compare identical reach, lane speed, temperature and reliability specs with qualified alternatives.",
+      "alternatives": "COHR/AAOI only for overlapping products; alternative laser/modulator architectures.",
+      "falsifier": "A performance advantage may not survive qualification of another supplier.",
+      "bottleneck_evidence": {
+        "physical_difficulty": "unknown",
+        "qualified_supplier_scarcity": "unknown",
+        "switching_cost": "unknown",
+        "economic_capture": "unknown",
+        "durability": "unknown"
+      },
+      "verdict": "candidate_for_research_not_proven_monopoly"
+    },
+    {
+      "ticker": "FN",
+      "cohorts": [
+        "optical-manufacturing"
+      ],
+      "role": "Manufacturing, precision alignment, packaging and test services.",
+      "source_ids": [
+        "fn"
+      ],
+      "constraint": "Repeatable assembly yield and customer-qualified throughput.",
+      "proof_needed": "Prove allocation, customer transfer/requalification costs, utilisation and retained economics.",
+      "alternatives": "Customer in-house production or other qualified assembly partners.",
+      "falsifier": "Complex assembly is not ownership of the customer's product IP or pricing.",
+      "bottleneck_evidence": {
+        "physical_difficulty": "unknown",
+        "qualified_supplier_scarcity": "unknown",
+        "switching_cost": "unknown",
+        "economic_capture": "unknown",
+        "durability": "unknown"
+      },
+      "verdict": "candidate_for_research_not_proven_monopoly"
+    },
+    {
+      "ticker": "AAOI",
+      "cohorts": [
+        "datacenter-components",
+        "datacenter-modules"
+      ],
+      "role": "Integrated laser-to-module manufacturing approach.",
+      "source_ids": [
+        "aaoi"
+      ],
+      "constraint": "Yield, reliable delivery and qualified module capacity.",
+      "proof_needed": "Prove qualification, orders, ramp yield and cash conversion; test customer concentration.",
+      "alternatives": "Other qualified transceiver suppliers or changing optical architectures.",
+      "falsifier": "More optical demand does not guarantee share gains or durable margins.",
+      "bottleneck_evidence": {
+        "physical_difficulty": "unknown",
+        "qualified_supplier_scarcity": "unknown",
+        "switching_cost": "unknown",
+        "economic_capture": "unknown",
+        "durability": "unknown"
+      },
+      "verdict": "candidate_for_research_not_proven_monopoly"
+    },
+    {
+      "ticker": "IPGP",
+      "cohorts": [
+        "industrial-lasers"
+      ],
+      "role": "Industrial fiber-laser exposure; not interchangeable with AI-network optics.",
+      "source_ids": [
+        "ipgp"
+      ],
+      "constraint": "Application-specific beam quality, uptime and total processing cost.",
+      "proof_needed": "Compare cost per accepted part and process qualification, not network bandwidth.",
+      "alternatives": "Coherent, nLight, Trumpf, Raycus and non-laser cutting/welding methods named in IPG filing.",
+      "falsifier": "Industrial pricing competition can offset technical progress.",
+      "bottleneck_evidence": {
+        "physical_difficulty": "unknown",
+        "qualified_supplier_scarcity": "unknown",
+        "switching_cost": "unknown",
+        "economic_capture": "unknown",
+        "durability": "unknown"
+      },
+      "verdict": "candidate_for_research_not_proven_monopoly"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "optics-volume",
+      "source_ids": [
+        "cohr",
+        "lite",
+        "aaoi"
+      ],
+      "trigger": "More traffic per rack and tighter energy budgets",
+      "steps": [
+        {
+          "order": 1,
+          "mechanism": "Customers may require more or faster optical links.",
+          "condition": "Deployment architecture actually uses those links.",
+          "falsifier": "Network topology or utilisation reduces link count."
+        },
+        {
+          "order": 2,
+          "mechanism": "Qualified laser, alignment or test capacity may constrain delivered modules.",
+          "condition": "Demand exceeds usable qualified capacity, not announced capacity.",
+          "falsifier": "Yield improvements and competing supply absorb demand."
+        },
+        {
+          "order": 3,
+          "mechanism": "Suppliers may earn better mix or economics, or customers may capture the benefit.",
+          "condition": "Contracts and pricing let suppliers retain value after capex and working capital.",
+          "falsifier": "Price erosion, buyer bargaining power or cash-intensive ramps offset growth."
+        }
+      ],
+      "type": "conditional_scenario",
+      "probability": null,
+      "stock_return": null
+    },
+    {
+      "id": "cpo-transition",
+      "source_ids": [
+        "cpo",
+        "cohr",
+        "fn"
+      ],
+      "trigger": "Adoption of co-packaged optics",
+      "steps": [
+        {
+          "order": 1,
+          "mechanism": "Optical engines move close to switch silicon.",
+          "condition": "Customers deploy the architecture at scale.",
+          "falsifier": "Serviceability, qualification or cost delays adoption."
+        },
+        {
+          "order": 2,
+          "mechanism": "Demand may move between pluggable modules, external lasers and precision packaging.",
+          "condition": "Specific bills of materials and supplier assignments change.",
+          "falsifier": "Existing suppliers adapt and retain content per system."
+        },
+        {
+          "order": 3,
+          "mechanism": "Profit may migrate to whichever layer controls qualification or scarce integration capacity.",
+          "condition": "That layer remains scarce and retains contractual economics.",
+          "falsifier": "Standardisation, dual sourcing or capacity expansion removes scarcity."
+        }
+      ],
+      "type": "conditional_scenario",
+      "probability": null,
+      "stock_return": null
+    }
+  ],
+  "valuation_status": "not_assessed_no_stock_winner",
+  "first_principles": [
+    "Network optics: compare delivered bandwidth, energy per bit, reach, reliability and cost at qualified yield.",
+    "Industrial lasers: compare accepted parts per hour, precision, uptime and total processing cost.",
+    "Business capture requires scarcity, switching friction and retained cash economics; physical difficulty alone is insufficient."
+  ]
+}

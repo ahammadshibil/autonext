@@ -1,0 +1,105 @@
+{
+  "security": {
+    "id": "NYSE:COHR:COMMON",
+    "company": "Coherent Corp.",
+    "ticker": "COHR",
+    "exchange": "NYSE",
+    "share_class": "common",
+    "currency": "USD",
+    "sector": "photonics"
+  },
+  "sources": [
+    {
+      "id": "cohr-fy26-q4-release",
+      "title": "Coherent FY2026 Q4 results and FY2027 Q1 outlook",
+      "locator": "https://ir.coherent.com/news-releases/news-release-details/coherent-corp-reports-fourth-quarter-and-full-year-fiscal-2026",
+      "visibility": "public",
+      "published_at": "2026-08-12T23:59:59Z",
+      "captured_at": "2026-11-16T02:04:33Z",
+      "excerpt": "Paraphrase of Business Outlook: FY2027 Q1 revenue guidance USD 2.2–2.4 billion; non-GAAP diluted EPS USD 1.85–2.05. Timestamp uses conservative end-of-publication-date UTC; not intraday precise."
+    },
+    {
+      "id": "cohr-fy27-q1-release",
+      "title": "Coherent FY2027 Q1 results",
+      "locator": "https://ir.coherent.com/news-releases/news-release-details/coherent-corp-reports-first-quarter-fiscal-2027-results",
+      "visibility": "public",
+      "published_at": "2026-11-04T23:59:59Z",
+      "captured_at": "2026-11-16T02:04:33Z",
+      "excerpt": "Paraphrase of financial tables: FY2027 Q1 consolidated revenue USD 2,370 million; non-GAAP diluted EPS USD 2.09. GAAP diluted EPS is separately USD 1.90. Period ended September 30, 2026. Conservative end-of-publication-date UTC timestamp."
+    }
+  ],
+  "claims": [
+    {
+      "id": "cohr-q1-volume",
+      "known_at": "2026-11-04T23:59:59Z",
+      "source_ids": [
+        "cohr-fy27-q1-release"
+      ],
+      "text": "Coherent reports consolidated FY2027 Q1 revenue of USD 2.370 billion. This establishes existing commercial scale, not proof of any particular new photonics programme.",
+      "status": "supported",
+      "stage": "volume_revenue"
+    }
+  ],
+  "expectations": [
+    {
+      "id": "cohr-guidance-revenue-q1",
+      "known_at": "2026-08-12T23:59:59Z",
+      "source_ids": [
+        "cohr-fy26-q4-release"
+      ],
+      "kind": "management_guidance",
+      "metric": "revenue",
+      "period": "FY2027 Q1",
+      "unit": "USD",
+      "basis": "consolidated reported revenue",
+      "value": 2300000000,
+      "low": 2200000000,
+      "high": 2400000000,
+      "value_note": "Computed midpoint of management's published range, not an additional point forecast."
+    },
+    {
+      "id": "cohr-actual-revenue-q1",
+      "known_at": "2026-11-04T23:59:59Z",
+      "source_ids": [
+        "cohr-fy27-q1-release"
+      ],
+      "kind": "observed_result",
+      "metric": "revenue",
+      "period": "FY2027 Q1",
+      "unit": "USD",
+      "basis": "consolidated reported revenue",
+      "value": 2370000000
+    },
+    {
+      "id": "cohr-guidance-eps-q1",
+      "known_at": "2026-08-12T23:59:59Z",
+      "source_ids": [
+        "cohr-fy26-q4-release"
+      ],
+      "kind": "management_guidance",
+      "metric": "diluted EPS",
+      "period": "FY2027 Q1",
+      "unit": "USD/share",
+      "basis": "non-GAAP",
+      "value": 1.95,
+      "low": 1.85,
+      "high": 2.05,
+      "value_note": "Computed midpoint of management's published range."
+    },
+    {
+      "id": "cohr-actual-eps-q1",
+      "known_at": "2026-11-04T23:59:59Z",
+      "source_ids": [
+        "cohr-fy27-q1-release"
+      ],
+      "kind": "observed_result",
+      "metric": "diluted EPS",
+      "period": "FY2027 Q1",
+      "unit": "USD/share",
+      "basis": "non-GAAP",
+      "value": 2.09
+    }
+  ],
+  "valuations": [],
+  "catalysts": []
+}

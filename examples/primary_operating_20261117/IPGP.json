@@ -1,0 +1,100 @@
+{
+  "security": {
+    "company": "IPG PHOTONICS CORP",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "id": "NASDAQ:IPGP:COMMON",
+    "sector": "photonics",
+    "share_class": "common",
+    "ticker": "IPGP"
+  },
+  "sources": [
+    {
+      "id": "ipgp-release-2026-11-03-review20261117",
+      "title": "IPGP quarterly earnings release 2026-11-03",
+      "locator": "https://investor.ipgphotonics.com/news/news-details/2026/IPG-Photonics-Announces-Third-Quarter-2026-Financial-Results/default.aspx",
+      "published_at": "2026-11-03T23:59:59Z",
+      "captured_at": "2026-11-17T05:26:47.971016+00:00",
+      "visibility": "public",
+      "excerpt": "Manual paraphrase: CY2026 Q3 revenue USD 2.875e+08; GAAP diluted EPS USD 0.47; issuer-defined non-GAAP diluted EPS USD 0.61. Management CY2026 Q4 revenue range USD 2.65e+08 to 2.95e+08, non-GAAP diluted EPS 0.3 to 0.6. Adjusted EPS is issuer-defined non-GAAP. Quarter benefited from net tariff refunds; Q4 guidance excludes Lumibird Medical contribution.",
+      "publication_precision": "day",
+      "timestamp_note": "Publication date conservatively assigned end of stated date UTC. Not suitable for intraday analysis. Web text manually reviewed; not a full document archive."
+    }
+  ],
+  "claims": [],
+  "expectations": [
+    {
+      "id": "ipgp-release-2026-11-03-review20261117-0",
+      "known_at": "2026-11-03T23:59:59Z",
+      "source_ids": [
+        "ipgp-release-2026-11-03-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "revenue",
+      "period": "CY2026 Q3",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 287500000.0
+    },
+    {
+      "id": "ipgp-release-2026-11-03-review20261117-1",
+      "known_at": "2026-11-03T23:59:59Z",
+      "source_ids": [
+        "ipgp-release-2026-11-03-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "CY2026 Q3",
+      "basis": "GAAP diluted",
+      "unit": "USD/share",
+      "value": 0.47
+    },
+    {
+      "id": "ipgp-release-2026-11-03-review20261117-2",
+      "known_at": "2026-11-03T23:59:59Z",
+      "source_ids": [
+        "ipgp-release-2026-11-03-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "CY2026 Q3",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 0.61
+    },
+    {
+      "id": "ipgp-release-2026-11-03-review20261117-3",
+      "known_at": "2026-11-03T23:59:59Z",
+      "source_ids": [
+        "ipgp-release-2026-11-03-review20261117"
+      ],
+      "kind": "management_guidance",
+      "metric": "revenue",
+      "period": "CY2026 Q4",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 280000000.0,
+      "low": 265000000.0,
+      "high": 295000000.0,
+      "normalization_note": "Range value is calculated midpoint, not a point forecast."
+    },
+    {
+      "id": "ipgp-release-2026-11-03-review20261117-4",
+      "known_at": "2026-11-03T23:59:59Z",
+      "source_ids": [
+        "ipgp-release-2026-11-03-review20261117"
+      ],
+      "kind": "management_guidance",
+      "metric": "EPS",
+      "period": "CY2026 Q4",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 0.44999999999999996,
+      "low": 0.3,
+      "high": 0.6,
+      "normalization_note": "Range value is calculated midpoint, not a point forecast."
+    }
+  ],
+  "catalysts": [],
+  "valuations": []
+}

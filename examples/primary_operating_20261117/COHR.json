@@ -1,0 +1,68 @@
+{
+  "security": {
+    "company": "Coherent Corp.",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "id": "NYSE:COHR:COMMON",
+    "sector": "photonics",
+    "share_class": "common",
+    "ticker": "COHR"
+  },
+  "sources": [
+    {
+      "id": "cohr-release-2026-11-04-review20261117",
+      "title": "COHR quarterly earnings release 2026-11-04",
+      "locator": "https://ir.coherent.com/news-releases/news-release-details/coherent-corp-reports-first-quarter-fiscal-2027-results",
+      "published_at": "2026-11-04T23:59:59Z",
+      "captured_at": "2026-11-17T05:26:47.971016+00:00",
+      "visibility": "public",
+      "excerpt": "Manual paraphrase: FY2027 Q1 revenue USD 2.37e+09; GAAP diluted EPS USD 1.9; issuer-defined non-GAAP diluted EPS USD 2.09. Revenue and EPS are reported quarterly results. Pro-forma growth guidance is not GAAP growth or consensus.",
+      "publication_precision": "day",
+      "timestamp_note": "Publication date conservatively assigned end of stated date UTC. Not suitable for intraday analysis. Web text manually reviewed; not a full document archive."
+    }
+  ],
+  "claims": [],
+  "expectations": [
+    {
+      "id": "cohr-release-2026-11-04-review20261117-0",
+      "known_at": "2026-11-04T23:59:59Z",
+      "source_ids": [
+        "cohr-release-2026-11-04-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "revenue",
+      "period": "FY2027 Q1",
+      "basis": "GAAP consolidated release",
+      "unit": "USD",
+      "value": 2370000000.0
+    },
+    {
+      "id": "cohr-release-2026-11-04-review20261117-1",
+      "known_at": "2026-11-04T23:59:59Z",
+      "source_ids": [
+        "cohr-release-2026-11-04-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "FY2027 Q1",
+      "basis": "GAAP diluted",
+      "unit": "USD/share",
+      "value": 1.9
+    },
+    {
+      "id": "cohr-release-2026-11-04-review20261117-2",
+      "known_at": "2026-11-04T23:59:59Z",
+      "source_ids": [
+        "cohr-release-2026-11-04-review20261117"
+      ],
+      "kind": "observed_result",
+      "metric": "EPS",
+      "period": "FY2027 Q1",
+      "basis": "issuer-defined non-GAAP diluted",
+      "unit": "USD/share",
+      "value": 2.09
+    }
+  ],
+  "catalysts": [],
+  "valuations": []
+}
