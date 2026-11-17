@@ -28,7 +28,10 @@ def archived_bundle(symbol,archive):
     receipts=[read_json(f) for f in archive.glob('*.receipt.json')]
     selected=[];data=[]
     for kind in ('submissions','companyfacts'):
-        r=max((r for r in receipts if r['cik']==COMPANIES[symbol] and r['kind']==kind),key=lambda r:a.timestamp(r['captured_at']))
+        matches=[r for r in receipts if r['cik']==COMPANIES[symbol] and r['kind']==kind]
+        if not matches:
+            raise ValueError(f"No archived SEC {kind} capture for {symbol}; run research_cli.py workflow with --refresh-sec and --sec-user-agent")
+        r=max(matches,key=lambda r:a.timestamp(r['captured_at']))
         file=(archive/r['raw_file']).resolve()
         if file.parent!=archive.resolve(): raise ValueError('Archive path escaped its directory')
         raw=file.read_bytes()

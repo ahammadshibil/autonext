@@ -36,8 +36,8 @@ The bundled company, prices, sources and outcomes are **entirely synthetic**. Th
 For a scenario with no interim distributions:
 
 ```text
-Required terminal equity = today's price Ã— (1 + discount rate)^years Ã— future diluted shares
-Required terminal EV = required terminal equity + future debt âˆ’ future cash
+Required terminal equity = today's price × (1 + discount rate)^years × future diluted shares
+Required terminal EV = required terminal equity + future debt − future cash
 Implied terminal revenue = required terminal EV / terminal EV-to-revenue multiple
 ```
 

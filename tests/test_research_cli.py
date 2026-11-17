@@ -4,8 +4,22 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 import research_cli as cli
+
+
+def fixture_archive(symbol, _archive):
+    source = json.loads((Path(__file__).parents[1] / "examples" / "primary_operating_20261117" / f"{symbol}.json").read_text(encoding="utf-8"))
+    return {
+        "security": source["security"],
+        "sources": [],
+        "claims": [],
+        "expectations": [],
+        "catalysts": [],
+        "valuations": [],
+        "earnings_scenarios": [],
+    }
 
 
 class ResearchCliTests(unittest.TestCase):
@@ -105,8 +119,9 @@ class ResearchCliTests(unittest.TestCase):
     def test_full_offline_workflow(self):
         output = Path(self.temp.name) / "workflow-desk"
         vault = Path(self.temp.name) / "workflow-vault"
-        with redirect_stdout(io.StringIO()):
-            result = cli.run_workflow(vault, output=output, offline=True)
+        with patch("research_desk.archived_bundle", side_effect=fixture_archive):
+            with redirect_stdout(io.StringIO()):
+                result = cli.run_workflow(vault, output=output, offline=True)
         self.assertEqual(result["doctor"]["failures"], 0)
         self.assertEqual(len(result["manifest"]["companies"]), 5)
         self.assertTrue((vault / "AutoNext Research.md").is_file())
