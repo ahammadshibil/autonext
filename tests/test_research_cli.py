@@ -34,8 +34,13 @@ class ResearchCliTests(unittest.TestCase):
             "as_of": "2026-01-01T00:00:00Z",
             "run_id": "run-1",
             "sources": [{"id": "s1", "title": "Test release", "excerpt": "Customer qualification reached volume production", "locator": "https://example.test", "published_at": "2025-12-31T00:00:00Z"}],
-            "expectations": [{"id": "test-release-1", "kind": "observed_result", "metric": "revenue", "basis": "GAAP", "period": "Q4", "value": 1000000, "unit": "USD"}],
+            "expectations": [
+                {"id": "test-release-revenue", "known_at": "2025-12-31T00:00:00Z", "kind": "observed_result", "metric": "revenue", "basis": "GAAP consolidated release", "period": "Q4", "value": 1000000, "unit": "USD"},
+                {"id": "test-release-eps", "known_at": "2025-12-31T00:00:00Z", "kind": "observed_result", "metric": "EPS", "basis": "GAAP diluted", "period": "Q4", "value": 1, "unit": "USD/share"},
+                {"id": "test-release-guidance", "known_at": "2025-12-31T00:00:00Z", "kind": "management_guidance", "metric": "revenue", "basis": "GAAP consolidated release", "period": "Q1", "value": 1200000, "low": 1100000, "high": 1300000, "unit": "USD"},
+            ],
             "expectation_comparisons": [],
+            "catalysts": [{"event": "Qualification decision", "expected_at": "2026-03-01T00:00:00Z", "weakens": "Customer delay"}],
             "earnings_analysis": [{
                 "input": {
                     "price_observation": {"price": 100, "currency": "USD", "observed_at": "2025-12-31T21:00:00Z"},
@@ -58,6 +63,18 @@ class ResearchCliTests(unittest.TestCase):
         self.assertAlmostEqual(result["required_terminal_eps"], 6.44204)
         self.assertAlmostEqual(result["required_total_earnings_per_current_share"], 7.730448)
         self.assertEqual(result["status"], "scenario_not_forecast")
+
+    def test_outlook_and_normalized_hurdle(self):
+        run = cli.Desk(self.desk).company("TEST")["run"]
+        outlook = cli.management_outlook(run)
+        self.assertEqual(len(outlook), 1)
+        self.assertAlmostEqual(outlook[0]["midpoint_change_percent"], 20)
+        context = cli.gaap_eps_hurdle(run)
+        self.assertEqual(context["status"], "mechanical_context_not_forecast")
+        self.assertEqual(context["annualized_quarterly_eps_run_rate"], 4)
+        self.assertAlmostEqual(context["implied_eps_cagr"], (6.44204 / 4) ** (1 / 5) - 1)
+        run["expectations"][1]["basis"] = "GAAP basic"
+        self.assertEqual(cli.gaap_eps_hurdle(run)["status"], "abstain")
 
     def test_latest_desk_and_company_load(self):
         found = cli.find_latest_desk(Path(self.temp.name))
@@ -83,6 +100,13 @@ class ResearchCliTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass")
         self.assertEqual(result["failures"], 0)
 
+    def test_doctor_flags_missing_catalyst(self):
+        desk = cli.Desk(self.desk)
+        desk.companies["TEST"]["run"]["catalysts"] = []
+        result = cli.doctor(desk, emit=False)
+        self.assertEqual(result["status"], "warn")
+        self.assertEqual(result["warnings"], 1)
+
     def test_terminal_commands(self):
         for arguments in (
             ["--desk", str(self.desk), "universe"],
@@ -93,6 +117,17 @@ class ResearchCliTests(unittest.TestCase):
         ):
             with redirect_stdout(io.StringIO()):
                 self.assertEqual(cli.main(arguments), 0)
+
+    def test_terminal_output_surfaces_decision_context(self):
+        desk = cli.Desk(self.desk)
+        output = io.StringIO()
+        with redirect_stdout(output):
+            cli.company(desk, "TEST")
+            cli.compare(desk, 25, 1, 5, 0.10, "ticker")
+        rendered = output.getvalue()
+        self.assertIn("Current management outlook", rendered)
+        self.assertIn("Normalized GAAP EPS hurdle context", rendered)
+        self.assertIn("Implied EPS CAGR", rendered)
 
     def test_obsidian_export_preserves_human_thesis(self):
         desk = cli.Desk(self.desk)
@@ -105,6 +140,9 @@ class ResearchCliTests(unittest.TestCase):
             cli.export_obsidian(desk, vault)
         self.assertEqual(thesis.read_text(encoding="utf-8"), "my independent thesis")
         self.assertTrue((vault / "Companies" / "TEST.md").exists())
+        company_text = (vault / "Companies" / "TEST.md").read_text(encoding="utf-8")
+        self.assertIn("Current management outlook", company_text)
+        self.assertIn("Normalized price hurdle", company_text)
         self.assertEqual(len(list((vault / "Snapshots").rglob("*.md"))), 1)
 
     def test_generated_export_refuses_user_owned_company_note(self):

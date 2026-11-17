@@ -101,5 +101,7 @@ python research_cli.py workflow --vault "C:\\path\\to\\vault\\AutoNext"
 
 Use `--desk PATH` before the command to inspect a specific historical desk. Comparisons and scenarios are transparent sensitivities, not forecasts, attractiveness rankings, recommendations or trade instructions. Search covers retained excerpts only. The Obsidian exporter refreshes generated company pages, creates immutable dated snapshots and never overwrites human-owned thesis notes. See `docs/TERMINAL_OBSIDIAN_PLAN.md`.
 
+Company and comparison views also surface current structured management guidance, its mechanical midpoint change from the latest like-for-like reported quarter, and a normalized GAAP diluted EPS hurdle. The EPS context annualizes one quarter and therefore ignores seasonality; it abstains when only basic, non-GAAP or non-comparable EPS is available. `doctor` warns when a company has no sourced, dated recognition catalyst instead of treating missing catalyst coverage as complete research.
+
 `workflow` is the end-to-end local command: it builds a new desk from the latest hash-verified SEC captures and reviewed operating releases, refreshes single-provider prices, exports the result to Obsidian and runs `doctor`. Add `--offline` to abstain from price-dependent analysis. To refresh SEC captures too, add `--refresh-sec --sec-user-agent "AutoNext research your@email.example"`; the SEC requires an identifying contact string.
 

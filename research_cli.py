@@ -92,6 +92,65 @@ def sensitivity_rows(run):
     return rows
 
 
+def management_outlook(run):
+    """Current guidance plus a like-for-like latest-quarter reference."""
+    releases = release_results(run)
+    if not releases:
+        return []
+    latest_release_at = max(parse_iso(row["known_at"]) for row in releases)
+    results = []
+    for item in run.get("expectations", []):
+        if item.get("kind") != "management_guidance" or parse_iso(item["known_at"]) < latest_release_at:
+            continue
+        row = dict(item)
+        candidates = [
+            actual for actual in releases
+            if all(actual.get(key) == item.get(key) for key in ("metric", "basis", "unit"))
+            and parse_iso(actual["known_at"]) <= parse_iso(item["known_at"])
+        ]
+        prior = max(candidates, key=lambda actual: parse_iso(actual["known_at"]), default=None)
+        row["prior_actual"] = prior
+        row["midpoint_change_percent"] = ((item["value"] / prior["value"] - 1) * 100
+                                             if prior and prior.get("value", 0) > 0 else None)
+        results.append(row)
+    return sorted(results, key=lambda row: (row.get("period", ""), row.get("metric", "")))
+
+
+def gaap_eps_hurdle(run, years=5, required_return=0.10, terminal_pe=25, share_factor=1):
+    """Annualize one GAAP diluted quarter and compare it with a price hurdle."""
+    observation = quote(run)
+    if not observation:
+        return {"status": "abstain", "reason": "no eligible checked price"}
+    hurdle = scenario(observation["price"], years, required_return, terminal_pe, share_factor)
+    candidates = [
+        row for row in release_results(run)
+        if row.get("metric", "").upper() == "EPS"
+        and row.get("basis", "").strip().lower() == "gaap diluted"
+        and row.get("unit") == f"{run['security']['currency']}/share"
+        and "Q" in row.get("period", "").upper()
+    ]
+    if not candidates:
+        return {**hurdle, "status": "abstain", "reason": "no comparable quarterly GAAP diluted EPS"}
+    actual = max(candidates, key=lambda row: parse_iso(row["known_at"]))
+    run_rate = actual["value"] * 4
+    if run_rate <= 0:
+        return {**hurdle, "status": "abstain", "reason": "GAAP diluted EPS run-rate is not positive", "latest_eps": actual}
+    return {
+        **hurdle,
+        "status": "mechanical_context_not_forecast",
+        "latest_eps": actual,
+        "annualized_quarterly_eps_run_rate": run_rate,
+        "implied_eps_cagr": (hurdle["required_terminal_eps"] / run_rate) ** (1 / years) - 1,
+        "context_limitation": "Annualizes one reported GAAP diluted quarter; ignores seasonality and is not an earnings forecast.",
+    }
+
+
+def guidance_display(row):
+    if "low" in row and "high" in row:
+        return f"{format_value(row['low'], row['unit'])} to {format_value(row['high'], row['unit'])} (mid {format_value(row['value'], row['unit'])})"
+    return format_value(row["value"], row["unit"])
+
+
 def scenario(price, years, required_return, terminal_pe, share_factor):
     values = (price, years, required_return, terminal_pe, share_factor)
     if any(not isinstance(value, (int, float)) for value in values):
@@ -234,6 +293,17 @@ def snapshot_note(symbol, data, snapshot_link):
     else:
         lines.append("No manually reviewed operating release in this snapshot.")
 
+    lines.extend(["", "## Current management outlook", ""])
+    outlook = management_outlook(run)
+    if outlook:
+        lines.extend(["| Metric | Basis | Guided period | Guidance | Versus latest reported quarter |", "|---|---|---|---:|---:|"])
+        for row in outlook:
+            change = f"{row['midpoint_change_percent']:+.1f}%" if row["midpoint_change_percent"] is not None else "not comparable"
+            lines.append(f"| {row['metric']} | {row['basis']} | {row['period']} | {guidance_display(row)} | {change} |")
+        lines.extend(["", "Guidance midpoint changes are mechanical comparisons, not forecasts or consensus surprises."])
+    else:
+        lines.append("No still-current structured management outlook in this snapshot.")
+
     lines.extend(["", "## Filed sequential changes", ""])
     changes = delta.get("sequential_changes", [])[:8]
     if changes:
@@ -252,6 +322,19 @@ def snapshot_note(symbol, data, snapshot_link):
     else:
         lines.append("No like-for-like expectation comparison available; no beat/miss inferred.")
 
+    lines.extend(["", "## Normalized GAAP EPS hurdle context", ""])
+    context = gaap_eps_hurdle(run)
+    if context["status"] == "mechanical_context_not_forecast":
+        lines.extend([
+            f"- Latest quarterly GAAP diluted EPS: {context['latest_eps']['value']:.2f} · {context['latest_eps']['period']}",
+            f"- Mechanical annualized run-rate: {context['annualized_quarterly_eps_run_rate']:.2f}",
+            f"- Required terminal EPS: {context['required_terminal_eps']:.2f} · {context['years']:g} years · {context['terminal_pe']:g}x terminal P/E",
+            f"- Implied growth from that run-rate: {context['implied_eps_cagr']:.1%} annually",
+            f"- Limitation: {context['context_limitation']}",
+        ])
+    else:
+        lines.append(f"**ABSTAIN:** {context['reason']}.")
+
     lines.extend(["", "## Price-implied sensitivity", ""])
     analyses = [
         item for item in run.get("earnings_analysis", [])
@@ -266,6 +349,14 @@ def snapshot_note(symbol, data, snapshot_link):
             lines.append(f"| {assumptions['terminal_pe']}x | {assumptions['future_share_factor']}x | {result['required_terminal_eps']:.2f} | {result['required_total_earnings_per_current_share']:.2f} |")
     else:
         lines.append("No eligible price; sensitivity abstains.")
+
+    lines.extend(["", "## Recognition catalyst coverage", ""])
+    catalysts = run.get("catalysts", [])
+    if catalysts:
+        for item in catalysts:
+            lines.append(f"- **{item['event']}** · expected {item['expected_at']} · weakens: {item['weakens']}")
+    else:
+        lines.append("**Research gap:** no sourced, dated recognition catalyst is present in this snapshot.")
 
     lines.extend([
         "",
@@ -290,6 +381,22 @@ def company_note(symbol, data, snapshot_link):
     price_line = f"{observation['price']:.2f} {observation['currency']} at {observation['observed_at']}" if observation else "ABSTAIN — no eligible checked observation"
     releases = release_results(run)
     release_lines = [f"- **{row['metric']} ({row['basis']}):** {format_value(row['value'], row['unit'])} · {row['period']}" for row in releases]
+    outlook_lines = []
+    for row in management_outlook(run):
+        change = f" · {row['midpoint_change_percent']:+.1f}% vs latest reported quarter" if row["midpoint_change_percent"] is not None else ""
+        outlook_lines.append(f"- **{row['metric']} ({row['basis']}):** {guidance_display(row)} · {row['period']}{change}")
+    context = gaap_eps_hurdle(run)
+    if context["status"] == "mechanical_context_not_forecast":
+        context_lines = [
+            f"- Latest-quarter GAAP diluted EPS annualized mechanically: {context['annualized_quarterly_eps_run_rate']:.2f}",
+            f"- Required terminal EPS at 25x / 10% return / five years: {context['required_terminal_eps']:.2f}",
+            f"- Implied growth from that run-rate: {context['implied_eps_cagr']:.1%} annually",
+            f"- Limitation: {context['context_limitation']}",
+        ]
+    else:
+        context_lines = [f"- **ABSTAIN:** {context['reason']}."]
+    catalyst_line = (f"{len(run.get('catalysts', []))} sourced, dated catalyst(s)"
+                     if run.get("catalysts") else "**Research gap:** no sourced, dated recognition catalyst")
     return "\n".join([
         frontmatter({
             "title": f"{symbol} — {security['company']}",
@@ -317,6 +424,18 @@ def company_note(symbol, data, snapshot_link):
         "## Latest operating release",
         "",
         *(release_lines or ["No manually reviewed operating release in this snapshot."]),
+        "",
+        "## Current management outlook",
+        "",
+        *(outlook_lines or ["No still-current structured management outlook in this snapshot."]),
+        "",
+        "## Normalized price hurdle",
+        "",
+        *context_lines,
+        "",
+        "## Recognition catalyst coverage",
+        "",
+        catalyst_line,
         "",
         "## Research loop",
         "",
@@ -476,6 +595,11 @@ def doctor(desk, vault=None, json_output=False, emit=True):
             add(symbol, "pass", "operating_release", f"{len(releases)} reviewed release observations")
         else:
             add(symbol, "warn", "operating_release", "no manually reviewed operating release")
+        catalysts = run.get("catalysts", [])
+        if catalysts:
+            add(symbol, "pass", "dated_catalyst", f"{len(catalysts)} sourced catalyst records")
+        else:
+            add(symbol, "warn", "dated_catalyst", "no sourced, dated recognition catalyst")
         if observation:
             age_days = (parse_iso(run["as_of"]) - parse_iso(observation["observed_at"])).total_seconds() / 86400
             if age_days < 0 or age_days > 7:
@@ -568,6 +692,8 @@ def universe(desk, json_output=False):
                 "currency": observation.get("currency") if observation else security.get("currency"),
                 "price_observed_at": observation.get("observed_at") if observation else None,
                 "sources": len(run.get("sources", [])),
+                "outlook_rows": len(management_outlook(run)),
+                "dated_catalysts": len(run.get("catalysts", [])),
                 "as_of": run.get("as_of"),
                 "run_id": run.get("run_id"),
             }
@@ -581,12 +707,14 @@ def universe(desk, json_output=False):
             item["company"],
             format_value(item["price"], item["currency"]) if item["price"] is not None else "ABSTAIN",
             item["sources"],
+            item["outlook_rows"],
+            item["dated_catalysts"],
             (item["as_of"] or "")[:10],
         )
         for item in result
     ]
     print(f"AutoNext research universe\nDesk: {desk.path}\n")
-    print(table(("Ticker", "Company", "Dated price", "Sources", "As of"), rows))
+    print(table(("Ticker", "Company", "Dated price", "Sources", "Outlook", "Catalysts", "As of"), rows))
     print(f"\n{DISCLAIMER}")
 
 
@@ -600,9 +728,12 @@ def company(desk, symbol, json_output=False):
         "run_id": run.get("run_id"),
         "price_observation": observation,
         "latest_operating_release": release_results(run),
+        "management_outlook": management_outlook(run),
         "expectation_comparisons": run.get("expectation_comparisons", []),
         "sequential_changes": delta.get("sequential_changes", []),
         "price_hurdles": sensitivity_rows(run),
+        "gaap_eps_hurdle": gaap_eps_hurdle(run),
+        "catalysts": run.get("catalysts", []),
         "source_count": len(run.get("sources", [])),
         "latest_source_published_at": max((row.get("published_at", "") for row in run.get("sources", [])), default=None),
         "report": str(desk.path / symbol.upper() / "report.md"),
@@ -630,6 +761,20 @@ def company(desk, symbol, json_output=False):
     else:
         print("No manually reviewed operating release in this snapshot.")
 
+    print("\nCurrent management outlook")
+    outlook = payload["management_outlook"]
+    if outlook:
+        print(table(
+            ("Metric", "Basis", "Guided period", "Guidance", "Vs latest quarter"),
+            [(
+                row["metric"], row["basis"], row["period"], guidance_display(row),
+                f"{row['midpoint_change_percent']:+.1f}%" if row["midpoint_change_percent"] is not None else "not comparable",
+            ) for row in outlook],
+        ))
+        print("Midpoint changes are mechanical like-for-like comparisons, not forecasts or consensus surprises.")
+    else:
+        print("No still-current structured management outlook in this snapshot.")
+
     print("\nFiled sequential changes")
     changes = payload["sequential_changes"][:8]
     if changes:
@@ -650,6 +795,16 @@ def company(desk, symbol, json_output=False):
     else:
         print("No like-for-like expectation comparison available; no beat/miss inferred.")
 
+    print("\nNormalized GAAP EPS hurdle context")
+    context = payload["gaap_eps_hurdle"]
+    if context["status"] == "mechanical_context_not_forecast":
+        print(f"Latest quarterly GAAP diluted EPS: {context['latest_eps']['value']:.2f} ({context['latest_eps']['period']})")
+        print(f"Mechanical annualized run-rate: {context['annualized_quarterly_eps_run_rate']:.2f}")
+        print(f"Required terminal EPS: {context['required_terminal_eps']:.2f} | implied {context['years']:g}y growth: {context['implied_eps_cagr']:.1%} annually")
+        print(context["context_limitation"])
+    else:
+        print(f"ABSTAIN - {context['reason']}.")
+
     print("\nPrice-implied sensitivity")
     hurdles = payload["price_hurdles"]
     if hurdles:
@@ -667,6 +822,13 @@ def company(desk, symbol, json_output=False):
         ))
     else:
         print("No eligible checked price; sensitivity abstains.")
+
+    print("\nRecognition catalyst coverage")
+    if payload["catalysts"]:
+        for item in payload["catalysts"]:
+            print(f"- {item['event']} | expected {item['expected_at']} | weakens: {item['weakens']}")
+    else:
+        print("RESEARCH GAP - no sourced, dated recognition catalyst in this snapshot.")
 
     print("\nUnresolved diligence")
     print("- Which qualified product bottleneck creates durable pricing power?")
@@ -688,17 +850,23 @@ def compare(desk, terminal_pe, share_factor, years, required_return, sort_by, js
             result.append({"ticker": symbol, "status": "abstain", "reason": "no eligible checked price"})
             continue
         row = scenario(observation["price"], years, required_return, terminal_pe, share_factor)
+        context = gaap_eps_hurdle(run, years, required_return, terminal_pe, share_factor)
+        revenue_outlook = next((item for item in management_outlook(run) if item.get("metric") == "revenue"), None)
         row.update(
             ticker=symbol,
             company=run["security"]["company"],
             currency=observation["currency"],
             price_observed_at=observation["observed_at"],
+            gaap_eps_run_rate=context.get("annualized_quarterly_eps_run_rate"),
+            implied_eps_cagr=context.get("implied_eps_cagr"),
+            gaap_eps_context_reason=context.get("reason"),
+            revenue_guidance_change_percent=revenue_outlook.get("midpoint_change_percent") if revenue_outlook else None,
         )
         result.append(row)
     available = [row for row in result if row.get("status") != "abstain"]
     missing = [row for row in result if row.get("status") == "abstain"]
     if sort_by == "hurdle":
-        available.sort(key=lambda row: row["required_terminal_eps"])
+        available.sort(key=lambda row: (row.get("implied_eps_cagr") is None, row.get("implied_eps_cagr", float("inf"))))
     elif sort_by == "price":
         available.sort(key=lambda row: row["current_price"])
     else:
@@ -709,14 +877,21 @@ def compare(desk, terminal_pe, share_factor, years, required_return, sort_by, js
         return
     print(f"Transparent price-hurdle screen | {years:g}y | return {required_return:.1%} | terminal P/E {terminal_pe:g}x | future shares {share_factor:g}x\n")
     print(table(
-        ("Ticker", "Dated price", "Required terminal price", "Required terminal EPS", "Observed"),
+        ("Ticker", "Dated price", "GAAP EPS run-rate", "Required terminal EPS", "Implied EPS CAGR", "Revenue guide vs latest"),
         [
-            (row["ticker"], format_value(row["current_price"], row["currency"]), format_value(row["required_terminal_price"], row["currency"]), format_value(row["required_terminal_eps"], row["currency"]), row["price_observed_at"][:10])
-            if row.get("status") != "abstain" else (row["ticker"], "ABSTAIN", "-", "-", row["reason"])
+            (
+                row["ticker"], format_value(row["current_price"], row["currency"]),
+                f"{row['gaap_eps_run_rate']:.2f}" if row.get("gaap_eps_run_rate") is not None else "ABSTAIN",
+                f"{row['required_terminal_eps']:.2f}",
+                f"{row['implied_eps_cagr']:.1%}" if row.get("implied_eps_cagr") is not None else "ABSTAIN",
+                f"{row['revenue_guidance_change_percent']:+.1f}%" if row.get("revenue_guidance_change_percent") is not None else "not available",
+            )
+            if row.get("status") != "abstain" else (row["ticker"], "ABSTAIN", "-", "-", "-", row["reason"])
             for row in result
         ],
     ))
-    print(f"\nSorting changes presentation only. A lower EPS hurdle is not automatically a better investment.\n{DISCLAIMER}")
+    print("\nGAAP EPS run-rate annualizes one latest quarter and ignores seasonality. Guidance uses management's range midpoint.")
+    print(f"Sorting changes presentation only; neither column is an attractiveness ranking.\n{DISCLAIMER}")
 
 
 def one_scenario(desk, symbol, years, required_return, terminal_pe, share_factor, json_output=False):
