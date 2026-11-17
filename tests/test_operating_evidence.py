@@ -23,6 +23,15 @@ class OperatingEvidenceTests(unittest.TestCase):
     self.assertIsNone(r['valuation'])
     self.assertEqual(r['earnings_analysis'],[])
    finally:db.close()
+ def test_lite_merger_state_has_sourced_recognition_events(self):
+  b=self.load('LITE');a.validate(b)
+  self.assertEqual(len(b['catalysts']),2)
+  self.assertTrue(any('4.500 MRVL' in source['excerpt'] for source in b['sources']))
+  db=a.connect(':memory:')
+  try:
+   a.ingest(db,b);r=a.build_run(db,b['security']['id'],'2026-12-02T00:00:00Z')
+   self.assertEqual(len(r['catalysts']),2)
+  finally:db.close()
  def test_no_pretend_historical_capture(self):
   b=self.load('LITE');db=a.connect(':memory:')
   try:

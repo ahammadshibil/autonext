@@ -19,6 +19,28 @@
       "excerpt": "Manual paraphrase: FY2027 Q1 revenue USD 1.2626e+09; GAAP diluted EPS USD 3.54; issuer-defined non-GAAP diluted EPS USD 4.57. Management FY2027 Q2 revenue range USD 1.575e+09 to 1.625e+09, non-GAAP diluted EPS 5.9 to 6.2. Use November 2 filed exhibit, not conflicting release-calendar snippets. Non-GAAP guidance is not reconciled GAAP EPS.",
       "publication_precision": "day",
       "timestamp_note": "Publication date conservatively assigned end of stated date UTC. Not suitable for intraday analysis. Web text manually reviewed; not a full document archive."
+    },
+    {
+      "id": "lite-merger-8k-2026-11-02-review20261117",
+      "title": "Lumentum Form 8-K: definitive Marvell merger agreement",
+      "locator": "https://www.sec.gov/Archives/edgar/data/1633978/000119312526442758/d163169d8k.htm",
+      "published_at": "2026-11-02T23:59:59Z",
+      "captured_at": "2026-11-17T09:00:00Z",
+      "visibility": "public",
+      "excerpt": "Manual paraphrase: Lumentum entered a definitive merger agreement with Marvell on November 1, 2026. Each eligible LITE common share is to convert into 4.500 MRVL common shares at closing. Completion requires both stockholder approvals, HSR and other regulatory approvals, an effective Form S-4, Nasdaq listing authorization and other stated conditions.",
+      "publication_precision": "day",
+      "timestamp_note": "Filing date conservatively assigned end of stated date UTC. Terms must be checked against the merger agreement and later amendments."
+    },
+    {
+      "id": "mrvl-q3-call-2026-11-06-review20261117",
+      "title": "Marvell announces fiscal Q3 2027 results call for December 1, 2026",
+      "locator": "https://investor.marvell.com/news-events/press-releases/detail/1041/marvell-technology-inc-announces-conference-call-to-review-third-quarter-of-fiscal-year-2027-financial-results",
+      "published_at": "2026-11-06T23:59:59Z",
+      "captured_at": "2026-11-17T09:00:00Z",
+      "visibility": "public",
+      "excerpt": "Manual paraphrase: Marvell will release fiscal Q3 2027 results and hold a conference call on December 1, 2026 at 1:30 p.m. Pacific Time. Because the LITE merger consideration is a fixed 4.500 MRVL shares, MRVL operating evidence and market price directly affect the value of the consideration.",
+      "publication_precision": "day",
+      "timestamp_note": "Release date conservatively assigned end of stated date UTC. The event is a recognition catalyst, not a prediction of direction."
     }
   ],
   "claims": [],
@@ -95,6 +117,34 @@
       "normalization_note": "Range value is calculated midpoint, not a point forecast."
     }
   ],
-  "catalysts": [],
+  "catalysts": [
+    {
+      "id": "lite-catalyst-mrvl-q3-2026-12-01-review20261117",
+      "known_at": "2026-11-06T23:59:59Z",
+      "source_ids": [
+        "mrvl-q3-call-2026-11-06-review20261117",
+        "lite-merger-8k-2026-11-02-review20261117"
+      ],
+      "event": "Marvell fiscal Q3 2027 results and conference call",
+      "expected_at": "2026-12-01T21:30:00Z",
+      "uncertainty": "How new Marvell operating evidence changes the market value of the fixed 4.500-share consideration.",
+      "supports": "Results and outlook that strengthen the value of MRVL and the strategic case for the combination.",
+      "weakens": "Results, outlook or deal commentary that reduce MRVL value or increase transaction uncertainty.",
+      "still_unresolved": "The event cannot resolve regulatory approvals, stockholder votes, final timing or post-close integration economics."
+    },
+    {
+      "id": "lite-catalyst-initial-outside-date-2027-11-01-review20261117",
+      "known_at": "2026-11-02T23:59:59Z",
+      "source_ids": [
+        "lite-merger-8k-2026-11-02-review20261117"
+      ],
+      "event": "Initial merger outside-date checkpoint",
+      "expected_at": "2027-11-01T23:59:59Z",
+      "uncertainty": "Whether the transaction has closed, can close promptly, or requires a regulatory extension under the agreement.",
+      "supports": "Required approvals and conditions are substantially complete, or the parties extend solely for remaining regulatory clearance.",
+      "weakens": "Material approvals remain unresolved, remedies damage the economics, or a party obtains a termination right.",
+      "still_unresolved": "The agreement permits specified extensions into 2028 for remaining regulatory conditions; reaching this date does not itself prove termination."
+    }
+  ],
   "valuations": []
 }

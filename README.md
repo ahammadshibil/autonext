@@ -90,6 +90,7 @@ Run `python research_desk.py --refresh-prices` and open the printed index.html. 
 ```console
 python research_cli.py universe
 python research_cli.py company COHR
+python research_cli.py dossier LITE
 python research_cli.py compare --terminal-pe 25 --return-rate 0.10 --years 5
 python research_cli.py scenario COHR --terminal-pe 20 --share-factor 1.1
 python research_cli.py search qualification volume --ticker COHR
@@ -102,6 +103,8 @@ python research_cli.py workflow --vault "C:\\path\\to\\vault\\AutoNext"
 Use `--desk PATH` before the command to inspect a specific historical desk. Comparisons and scenarios are transparent sensitivities, not forecasts, attractiveness rankings, recommendations or trade instructions. Search covers retained excerpts only. The Obsidian exporter refreshes generated company pages, creates immutable dated snapshots and never overwrites human-owned thesis notes. See `docs/TERMINAL_OBSIDIAN_PLAN.md`.
 
 Company and comparison views also surface current structured management guidance, its mechanical midpoint change from the latest like-for-like reported quarter, and a normalized GAAP diluted EPS hurdle. The EPS context annualizes one quarter and therefore ignores seasonality; it abstains when only basic, non-GAAP or non-comparable EPS is available. `doctor` warns when a company has no sourced, dated recognition catalyst instead of treating missing catalyst coverage as complete research.
+
+Security state takes precedence over the generic screen. Lumentum is tagged as a pending fixed-ratio all-stock merger: `compare` excludes it from the standalone EPS table, `scenario LITE` redirects to the dossier, and `dossier LITE` shows the 4.5 MRVL exchange ratio, same-time spread arithmetic, closing conditions, three clocks, capability stack, scenario tree and disconfirmers. The dated merger arithmetic is not a probability-weighted return or recommendation. Obsidian exports the same view to `Dossiers/LITE.md`.
 
 `workflow` is the end-to-end local command: it builds a new desk from the latest hash-verified SEC captures and reviewed operating releases, refreshes single-provider prices, exports the result to Obsidian and runs `doctor`. Add `--offline` to abstain from price-dependent analysis. To refresh SEC captures too, add `--refresh-sec --sec-user-agent "AutoNext research your@email.example"`; the SEC requires an identifying contact string.
 

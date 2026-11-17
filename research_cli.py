@@ -14,10 +14,66 @@ import sys
 ROOT = Path(__file__).resolve().parent
 DISCLAIMER = "Sensitivity analysis only; not a forecast, ranking, recommendation or trade instruction."
 GENERATED_MARKER = "autonext_generated: true"
+DOSSIER_DIR = ROOT / "dossiers"
 
 
 def read_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+
+
+def load_dossier(symbol, required=True):
+    """Load a small, sourced security-state override for non-standalone cases."""
+    symbol = str(symbol).upper()
+    path = DOSSIER_DIR / f"{symbol}.json"
+    if not path.is_file():
+        if required:
+            raise ValueError(f"No investment dossier for {symbol}: {path}")
+        return None
+    dossier = read_json(path)
+    for key in ("schema_version", "ticker", "as_of", "security_state", "executive_view", "sources"):
+        if key not in dossier:
+            raise ValueError(f"Dossier {path} is missing {key}")
+    if dossier["schema_version"] != 1 or dossier["ticker"].upper() != symbol:
+        raise ValueError(f"Invalid dossier identity or schema: {path}")
+    mode = dossier["security_state"].get("mode")
+    if mode not in ("standalone", "pending_all_stock_merger"):
+        raise ValueError(f"Unsupported security state in {path}: {mode}")
+    if not dossier["sources"] or any(not row.get("url", "").startswith("https://") for row in dossier["sources"]):
+        raise ValueError(f"Dossier sources must contain HTTPS URLs: {path}")
+    if mode == "pending_all_stock_merger":
+        transaction = dossier.get("transaction", {})
+        prices = transaction.get("dated_prices", {})
+        if transaction.get("exchange_ratio", 0) <= 0 or prices.get("lite", 0) <= 0 or prices.get("mrvl", 0) <= 0:
+            raise ValueError(f"Dossier merger terms and dated prices must be positive: {path}")
+    return dossier
+
+
+def security_mode(symbol):
+    dossier = load_dossier(symbol, required=False)
+    return dossier["security_state"]["mode"] if dossier else "standalone"
+
+
+def merger_math(dossier):
+    """Mechanical fixed-ratio arithmetic using same-time dated inputs."""
+    transaction = dossier["transaction"]
+    prices = transaction["dated_prices"]
+    ratio, lite, mrvl = transaction["exchange_ratio"], prices["lite"], prices["mrvl"]
+    implied = ratio * mrvl
+    effective_ratio = lite / mrvl
+    return {
+        "observed_at": prices["observed_at"],
+        "currency": prices["currency"],
+        "exchange_ratio": ratio,
+        "lite_price": lite,
+        "mrvl_price": mrvl,
+        "implied_consideration": implied,
+        "gross_spread_per_lite_share": implied - lite,
+        "gross_spread_percent": implied / lite - 1,
+        "effective_market_ratio": effective_ratio,
+        "discount_to_contractual_ratio": 1 - effective_ratio / ratio,
+        "mrvl_break_even_for_lite_price": lite / ratio,
+        "limitation": "Static same-time arithmetic before time value, taxes, borrow, hedging, closing probability or break-case value; MRVL price is from a secondary source pending independent reconciliation.",
+    }
 
 
 def find_latest_desk(outputs=None):
@@ -375,9 +431,118 @@ def snapshot_note(symbol, data, snapshot_link):
     return "\n".join(lines)
 
 
+def dossier_note(dossier):
+    symbol = dossier["ticker"].upper()
+    state = dossier["security_state"]
+    math = merger_math(dossier) if state["mode"] == "pending_all_stock_merger" else None
+    lines = [
+        frontmatter({
+            "title": f"{symbol} Investment Dossier",
+            "ticker": symbol,
+            "company": dossier["company"],
+            "as_of": dossier["as_of"],
+            "security_mode": state["mode"],
+            "note_type": "autonext-dossier",
+            "autonext_generated": True,
+            "tags": ["autonext/dossier", f"company/{symbol.lower()}", "security-state/merger"],
+        }),
+        f"# {symbol} · transaction-first investment dossier",
+        "",
+        "> [!danger] Security state changed",
+        f"> **{state['mode'].replace('_', ' ').upper()}** — {state['primary_question']}",
+        f"> {dossier['executive_view']['boundary']}",
+        "",
+        "## Executive view",
+        "",
+        dossier["executive_view"]["summary"],
+        "",
+        f"**Why the ordinary screen is wrong:** {dossier['executive_view']['why_the_old_screen_is_wrong']}",
+        "",
+        f"**Correct decision frame:** {dossier['executive_view']['decision_frame']}",
+    ]
+    if math:
+        lines.extend([
+            "",
+            "## Fixed-ratio transaction math",
+            "",
+            f"Price basis: {math['observed_at']} · {math['currency']} · static same-time observations.",
+            "",
+            "| Input or output | Value |",
+            "|---|---:|",
+            f"| Contractual exchange ratio | {math['exchange_ratio']:.3f} MRVL / LITE |",
+            f"| LITE price | {math['lite_price']:.2f} |",
+            f"| MRVL price | {math['mrvl_price']:.2f} |",
+            f"| Implied consideration | {math['implied_consideration']:.2f} |",
+            f"| Gross spread | {math['gross_spread_per_lite_share']:.2f} · {math['gross_spread_percent']:.2%} |",
+            f"| Effective market ratio | {math['effective_market_ratio']:.3f} MRVL / LITE |",
+            f"| Discount to contractual ratio | {math['discount_to_contractual_ratio']:.2%} |",
+            f"| MRVL break-even for the dated LITE price | {math['mrvl_break_even_for_lite_price']:.2f} |",
+            "",
+            f"> [!warning] Arithmetic boundary\n> {math['limitation']}",
+        ])
+    transaction = dossier["transaction"]
+    lines.extend([
+        "",
+        "## Closing path",
+        "",
+        f"- Company-stated expected close: **{transaction['expected_close_company_statement']}**",
+        f"- Initial outside date: **{transaction['initial_outside_date']}**",
+        f"- Possible regulatory extensions: {', '.join(transaction['possible_regulatory_extensions'])}",
+        "- Required conditions:",
+        *[f"  - {item}" for item in transaction["closing_conditions"]],
+        "",
+        "## The three clocks",
+        "",
+        f"**Discovery — {dossier['three_clocks']['discovery']['date']}:** {dossier['three_clocks']['discovery']['event']}. {dossier['three_clocks']['discovery']['meaning']}",
+        "",
+        "**Recognition events**",
+        "",
+        *[f"- **{item['window']} — {item['event']}:** {item['why_it_matters']}" for item in dossier["three_clocks"]["recognition"]],
+        "",
+        f"**Monetisation — {dossier['three_clocks']['monetisation']['window']}:** {dossier['three_clocks']['monetisation']['meaning']}",
+        "",
+        "## Reinforcing capability stack",
+        "",
+        "| Layer | Capability | Evidence boundary |",
+        "|---|---|---|",
+        *[f"| {item['layer']} | {item['lumentum_capability']} | {item['evidence_status']} |" for item in dossier["capability_stack"]],
+        "",
+        "## Standalone operating evidence",
+        "",
+        *[f"- **{item['period']} · {item['classification']}:** {item['fact']}" for item in dossier["operating_evidence"]],
+        "",
+        "## Strategic logic",
+        "",
+        f"- Physical bottleneck: {dossier['strategic_logic']['physical_bottleneck']}",
+        f"- Reinforcement loop: {dossier['strategic_logic']['reinforcement_loop']}",
+        f"- Value-capture question: {dossier['strategic_logic']['value_capture_question']}",
+        f"- Labeled inference: {dossier['strategic_logic']['labeled_inference']}",
+        "",
+        "## Scenario tree",
+        "",
+        *[f"### {item['name']}\n\n{item['mechanics']}\n\nDominant variables: {', '.join(item['dominant_variables'])}." for item in dossier["scenarios"]],
+        "",
+        "## Disconfirmers",
+        "",
+        *[f"- {item}" for item in dossier["disconfirmers"]],
+        "",
+        "## Open questions",
+        "",
+        *[f"- [ ] {item}" for item in dossier["open_questions"]],
+        "",
+        "## Sources",
+        "",
+        *[f"- [{source['title']}]({source['url']}) · {source['type']}" for source in dossier["sources"]],
+        "",
+    ])
+    return "\n".join(lines)
+
+
 def company_note(symbol, data, snapshot_link):
     run = data["run"]
     security, observation = run["security"], quote(run)
+    mode = security_mode(symbol)
+    dossier = load_dossier(symbol, required=False)
     price_line = f"{observation['price']:.2f} {observation['currency']} at {observation['observed_at']}" if observation else "ABSTAIN — no eligible checked observation"
     releases = release_results(run)
     release_lines = [f"- **{row['metric']} ({row['basis']}):** {format_value(row['value'], row['unit'])} · {row['period']}" for row in releases]
@@ -395,6 +560,17 @@ def company_note(symbol, data, snapshot_link):
         ]
     else:
         context_lines = [f"- **ABSTAIN:** {context['reason']}."]
+    if dossier:
+        state_lines = [
+            f"- Mode: **{mode.replace('_', ' ').upper()}**",
+            f"- Primary question: {dossier['security_state']['primary_question']}",
+            f"- Full transaction-first analysis: [[Dossiers/{symbol}|{symbol} investment dossier]]",
+            "- The operating evidence below is secondary, counterfactual context for delay or deal break.",
+        ]
+        hurdle_heading = "## Standalone counterfactual: normalized price hurdle"
+    else:
+        state_lines = ["- Mode: **STANDALONE**"]
+        hurdle_heading = "## Normalized price hurdle"
     catalyst_line = (f"{len(run.get('catalysts', []))} sourced, dated catalyst(s)"
                      if run.get("catalysts") else "**Research gap:** no sourced, dated recognition catalyst")
     return "\n".join([
@@ -421,6 +597,10 @@ def company_note(symbol, data, snapshot_link):
         f"- Dated price: {price_line}",
         f"- Retained sources: {len(run.get('sources', []))}",
         "",
+        "## Security state",
+        "",
+        *state_lines,
+        "",
         "## Latest operating release",
         "",
         *(release_lines or ["No manually reviewed operating release in this snapshot."]),
@@ -429,7 +609,7 @@ def company_note(symbol, data, snapshot_link):
         "",
         *(outlook_lines or ["No still-current structured management outlook in this snapshot."]),
         "",
-        "## Normalized price hurdle",
+        hurdle_heading,
         "",
         *context_lines,
         "",
@@ -522,12 +702,17 @@ def export_obsidian(desk, output, json_output=False, emit=True):
         snapshot_path = output / "Snapshots" / date / f"{snapshot_name}.md"
         write_immutable(snapshot_path, snapshot_note(symbol, data, snapshot_link))
         write_generated(output / "Companies" / f"{symbol}.md", company_note(symbol, data, snapshot_link))
+        dossier = load_dossier(symbol, required=False)
+        dossier_path = None
+        if dossier:
+            dossier_path = output / "Dossiers" / f"{symbol}.md"
+            write_generated(dossier_path, dossier_note(dossier))
         thesis_path = output / "Theses" / f"{symbol} Thesis.md"
         if not thesis_path.exists():
             thesis_path.parent.mkdir(parents=True, exist_ok=True)
             thesis_path.write_text(thesis_template(symbol, run["security"]), encoding="utf-8")
             created_theses.append(str(thesis_path))
-        exported.append({"ticker": symbol, "company_note": str(output / "Companies" / f"{symbol}.md"), "snapshot": str(snapshot_path), "thesis": str(thesis_path)})
+        exported.append({"ticker": symbol, "company_note": str(output / "Companies" / f"{symbol}.md"), "snapshot": str(snapshot_path), "thesis": str(thesis_path), "dossier": str(dossier_path) if dossier_path else None})
 
     home = [
         frontmatter({"title": "AutoNext Research", "as_of": desk.manifest.get("created_at", "unknown"), "note_type": "autonext-home", "autonext_generated": True, "tags": ["autonext/home"]}),
@@ -540,13 +725,14 @@ def export_obsidian(desk, output, json_output=False, emit=True):
         "",
         "## Companies",
         "",
-        "| Company | Working thesis | Latest evidence |",
-        "|---|---|---|",
+        "| Company | Security-state dossier | Working thesis | Latest evidence |",
+        "|---|---|---|---|",
     ]
     for item in exported:
         symbol = item["ticker"]
         snapshot_name = Path(item["snapshot"]).stem
-        home.append(f"| [[Companies/{symbol}|{symbol}]] | [[Theses/{symbol} Thesis|Thesis]] | [[Snapshots/{date}/{snapshot_name}|{date}]] |")
+        dossier_link = f"[[Dossiers/{symbol}|Dossier]]" if item["dossier"] else "—"
+        home.append(f"| [[Companies/{symbol}|{symbol}]] | {dossier_link} | [[Theses/{symbol} Thesis|Thesis]] | [[Snapshots/{date}/{snapshot_name}|{date}]] |")
     home.extend([
         "",
         "## Workflow",
@@ -584,6 +770,7 @@ def doctor(desk, vault=None, json_output=False, emit=True):
 
     for symbol, data in sorted(desk.companies.items()):
         run = data["run"]
+        dossier = load_dossier(symbol, required=False)
         sources = run.get("sources", [])
         releases = release_results(run)
         observation = quote(run)
@@ -600,6 +787,8 @@ def doctor(desk, vault=None, json_output=False, emit=True):
             add(symbol, "pass", "dated_catalyst", f"{len(catalysts)} sourced catalyst records")
         else:
             add(symbol, "warn", "dated_catalyst", "no sourced, dated recognition catalyst")
+        if dossier:
+            add(symbol, "pass", "security_state", f"{dossier['security_state']['mode']} dossier as of {dossier['as_of']}")
         if observation:
             age_days = (parse_iso(run["as_of"]) - parse_iso(observation["observed_at"])).total_seconds() / 86400
             if age_days < 0 or age_days > 7:
@@ -626,6 +815,9 @@ def doctor(desk, vault=None, json_output=False, emit=True):
             add(symbol, "pass" if company_path.is_file() else "fail", "vault_company", str(company_path))
             add(symbol, "pass" if thesis_path.is_file() else "fail", "vault_thesis", str(thesis_path))
             add(symbol, "pass" if snapshot_count else "fail", "vault_snapshot", f"{snapshot_count} immutable snapshots")
+            if load_dossier(symbol, required=False):
+                dossier_path = vault / "Dossiers" / f"{symbol}.md"
+                add(symbol, "pass" if dossier_path.is_file() else "fail", "vault_dossier", str(dossier_path))
 
     failures = sum(row["level"] == "fail" for row in checks)
     warnings = sum(row["level"] == "warn" for row in checks)
@@ -688,6 +880,7 @@ def universe(desk, json_output=False):
             {
                 "ticker": symbol,
                 "company": security["company"],
+                "security_mode": security_mode(symbol),
                 "price": observation.get("price") if observation else None,
                 "currency": observation.get("currency") if observation else security.get("currency"),
                 "price_observed_at": observation.get("observed_at") if observation else None,
@@ -705,6 +898,7 @@ def universe(desk, json_output=False):
         (
             item["ticker"],
             item["company"],
+            item["security_mode"].replace("pending_all_stock_merger", "MERGER").replace("standalone", "standalone"),
             format_value(item["price"], item["currency"]) if item["price"] is not None else "ABSTAIN",
             item["sources"],
             item["outlook_rows"],
@@ -714,7 +908,7 @@ def universe(desk, json_output=False):
         for item in result
     ]
     print(f"AutoNext research universe\nDesk: {desk.path}\n")
-    print(table(("Ticker", "Company", "Dated price", "Sources", "Outlook", "Catalysts", "As of"), rows))
+    print(table(("Ticker", "Company", "Mode", "Dated price", "Sources", "Outlook", "Catalysts", "As of"), rows))
     print(f"\n{DISCLAIMER}")
 
 
@@ -722,8 +916,13 @@ def company(desk, symbol, json_output=False):
     data = desk.company(symbol)
     run, delta = data["run"], data["changes"]
     security, observation = run["security"], quote(run)
+    mode = security_mode(symbol)
+    dossier = load_dossier(symbol, required=False)
     payload = {
         "security": security,
+        "security_mode": mode,
+        "security_state_dossier": dossier,
+        "transaction_math": merger_math(dossier) if dossier and mode == "pending_all_stock_merger" else None,
         "as_of": run.get("as_of"),
         "run_id": run.get("run_id"),
         "price_observation": observation,
@@ -745,6 +944,12 @@ def company(desk, symbol, json_output=False):
         return
     print(f"{symbol.upper()} | {security['company']}\n{'=' * (len(symbol) + len(security['company']) + 3)}")
     print(f"Security: {security['exchange']}:{security['ticker']} | {security['currency']} | {security.get('sector', 'n/a')}")
+    print(f"Security mode: {mode.replace('_', ' ').upper()}")
+    if dossier:
+        math = payload["transaction_math"]
+        print(f"PRIMARY FRAME: {dossier['security_state']['primary_question']}")
+        print(f"Dated merger math: {math['lite_price']:.2f} LITE vs {math['exchange_ratio']:.3f} x {math['mrvl_price']:.2f} MRVL = {math['implied_consideration']:.2f}; gross spread {math['gross_spread_percent']:.2%}")
+        print("Run `python research_cli.py dossier LITE` for closing conditions, clocks, capability stack and scenario tree.")
     print(f"Evidence as of: {run.get('as_of')} | {payload['source_count']} retained sources")
     if observation:
         print(f"Dated price: {format_value(observation['price'], observation['currency'])} observed {observation['observed_at']}")
@@ -752,7 +957,8 @@ def company(desk, symbol, json_output=False):
         print("Dated price: ABSTAIN - no eligible checked observation")
 
     releases = payload["latest_operating_release"]
-    print("\nLatest manually reviewed operating release")
+    operating_label = "Standalone operating release (counterfactual if the deal breaks)" if dossier else "Latest manually reviewed operating release"
+    print(f"\n{operating_label}")
     if releases:
         print(table(
             ("Metric", "Basis", "Period", "Reported"),
@@ -795,7 +1001,8 @@ def company(desk, symbol, json_output=False):
     else:
         print("No like-for-like expectation comparison available; no beat/miss inferred.")
 
-    print("\nNormalized GAAP EPS hurdle context")
+    hurdle_label = "Standalone counterfactual: normalized GAAP EPS hurdle" if dossier else "Normalized GAAP EPS hurdle context"
+    print(f"\n{hurdle_label}")
     context = payload["gaap_eps_hurdle"]
     if context["status"] == "mechanical_context_not_forecast":
         print(f"Latest quarterly GAAP diluted EPS: {context['latest_eps']['value']:.2f} ({context['latest_eps']['period']})")
@@ -841,10 +1048,101 @@ def company(desk, symbol, json_output=False):
     print(f"\n{DISCLAIMER}")
 
 
+def dossier(desk, symbol, json_output=False):
+    record = load_dossier(symbol)
+    symbol = record["ticker"].upper()
+    state = record["security_state"]
+    math = merger_math(record) if state["mode"] == "pending_all_stock_merger" else None
+    desk_quote = quote(desk.company(symbol)["run"]) if symbol in desk.companies else None
+    payload = {
+        "dossier": record,
+        "transaction_math": math,
+        "desk_target_quote": desk_quote,
+        "limitation": DISCLAIMER,
+    }
+    if json_output:
+        as_json(payload)
+        return
+
+    print(f"{symbol} | transaction-first investment dossier | as of {record['as_of']}")
+    print("=" * 72)
+    print(f"Security mode: {state['mode'].replace('_', ' ').upper()}")
+    print(f"Primary question: {state['primary_question']}")
+    print(f"\n{record['executive_view']['summary']}")
+    print(f"Why the ordinary screen is wrong: {record['executive_view']['why_the_old_screen_is_wrong']}")
+
+    if math:
+        print("\nFixed-ratio transaction math")
+        print(table(
+            ("Measure", "Value"),
+            [
+                ("Price basis", math["observed_at"]),
+                ("Contractual ratio", f"{math['exchange_ratio']:.3f} MRVL / LITE"),
+                ("LITE price", f"{math['lite_price']:.2f} {math['currency']}"),
+                ("MRVL price", f"{math['mrvl_price']:.2f} {math['currency']}"),
+                ("Implied consideration", f"{math['implied_consideration']:.2f} {math['currency']}"),
+                ("Gross spread", f"{math['gross_spread_per_lite_share']:.2f} / {math['gross_spread_percent']:.2%}"),
+                ("Effective market ratio", f"{math['effective_market_ratio']:.3f} MRVL / LITE"),
+                ("Discount to contractual ratio", f"{math['discount_to_contractual_ratio']:.2%}"),
+                ("MRVL break-even", f"{math['mrvl_break_even_for_lite_price']:.2f} {math['currency']}"),
+            ],
+        ))
+        print(math["limitation"])
+        if desk_quote and desk_quote.get("observed_at") != math["observed_at"]:
+            print(f"Desk note: a separate LITE quote exists at {desk_quote['observed_at']}; it is not mixed with the dated MRVL input above.")
+
+    transaction = record["transaction"]
+    print("\nClosing path")
+    print(f"Expected close (company statement): {transaction['expected_close_company_statement']}")
+    print(f"Initial outside date: {transaction['initial_outside_date']} | possible regulatory extensions: {', '.join(transaction['possible_regulatory_extensions'])}")
+    for condition in transaction["closing_conditions"]:
+        print(f"- {condition}")
+
+    print("\nThree clocks")
+    discovery = record["three_clocks"]["discovery"]
+    print(f"Discovery: {discovery['date']} | {discovery['event']}")
+    for item in record["three_clocks"]["recognition"]:
+        print(f"Recognition: {item['window']} | {item['event']} | {item['why_it_matters']}")
+    monetisation = record["three_clocks"]["monetisation"]
+    print(f"Monetisation: {monetisation['window']} | {monetisation['event']}")
+
+    print("\nReinforcing capability stack")
+    print(table(
+        ("Layer", "Lumentum / combined capability"),
+        [(item["layer"], item["lumentum_capability"]) for item in record["capability_stack"]],
+    ))
+
+    print("\nScenario tree")
+    for item in record["scenarios"]:
+        print(f"- {item['name']}: {item['mechanics']}")
+        print(f"  Dominant variables: {', '.join(item['dominant_variables'])}")
+
+    print("\nNext disconfirming evidence")
+    for item in record["disconfirmers"]:
+        print(f"- {item}")
+
+    print("\nOpen questions")
+    for item in record["open_questions"]:
+        print(f"- [ ] {item}")
+
+    print(f"\nSources: {len(record['sources'])} | full linked list exports to Obsidian Dossiers/{symbol}.md")
+    print(f"{record['executive_view']['boundary']}\n{DISCLAIMER}")
+
+
 def compare(desk, terminal_pe, share_factor, years, required_return, sort_by, json_output=False):
     result = []
     for symbol, data in desk.companies.items():
         run = data["run"]
+        mode = security_mode(symbol)
+        if mode != "standalone":
+            result.append({
+                "ticker": symbol,
+                "company": run["security"]["company"],
+                "status": "corporate_action",
+                "security_mode": mode,
+                "reason": f"Standalone EPS screen is not primary; run dossier {symbol}",
+            })
+            continue
         observation = quote(run)
         if not observation:
             result.append({"ticker": symbol, "status": "abstain", "reason": "no eligible checked price"})
@@ -863,8 +1161,8 @@ def compare(desk, terminal_pe, share_factor, years, required_return, sort_by, js
             revenue_guidance_change_percent=revenue_outlook.get("midpoint_change_percent") if revenue_outlook else None,
         )
         result.append(row)
-    available = [row for row in result if row.get("status") != "abstain"]
-    missing = [row for row in result if row.get("status") == "abstain"]
+    available = [row for row in result if row.get("status") not in ("abstain", "corporate_action")]
+    missing = [row for row in result if row.get("status") in ("abstain", "corporate_action")]
     if sort_by == "hurdle":
         available.sort(key=lambda row: (row.get("implied_eps_cagr") is None, row.get("implied_eps_cagr", float("inf"))))
     elif sort_by == "price":
@@ -886,15 +1184,22 @@ def compare(desk, terminal_pe, share_factor, years, required_return, sort_by, js
                 f"{row['implied_eps_cagr']:.1%}" if row.get("implied_eps_cagr") is not None else "ABSTAIN",
                 f"{row['revenue_guidance_change_percent']:+.1f}%" if row.get("revenue_guidance_change_percent") is not None else "not available",
             )
-            if row.get("status") != "abstain" else (row["ticker"], "ABSTAIN", "-", "-", "-", row["reason"])
+            if row.get("status") not in ("abstain", "corporate_action")
+            else (row["ticker"], "CORPORATE ACTION", "-", "-", "-", row["reason"])
+            if row.get("status") == "corporate_action"
+            else (row["ticker"], "ABSTAIN", "-", "-", "-", row["reason"])
             for row in result
         ],
     ))
-    print("\nGAAP EPS run-rate annualizes one latest quarter and ignores seasonality. Guidance uses management's range midpoint.")
+    print("\nPending corporate actions are excluded from the standalone EPS screen and routed to a transaction-first dossier.")
+    print("GAAP EPS run-rate annualizes one latest quarter and ignores seasonality. Guidance uses management's range midpoint.")
     print(f"Sorting changes presentation only; neither column is an attractiveness ranking.\n{DISCLAIMER}")
 
 
 def one_scenario(desk, symbol, years, required_return, terminal_pe, share_factor, json_output=False):
+    mode = security_mode(symbol)
+    if mode != "standalone":
+        raise ValueError(f"{symbol.upper()} is {mode}; run `python research_cli.py dossier {symbol.upper()}` instead of a standalone EPS scenario")
     run = desk.company(symbol)["run"]
     observation = quote(run)
     if not observation:
@@ -952,6 +1257,8 @@ def parser():
     commands.add_parser("universe", help="List available companies and dated observations")
     company_parser = commands.add_parser("company", help="Inspect one company's evidence and operating changes")
     company_parser.add_argument("ticker")
+    dossier_parser = commands.add_parser("dossier", help="Inspect a transaction-first, sourced investment dossier")
+    dossier_parser.add_argument("ticker")
     compare_parser = commands.add_parser("compare", help="Compare an explicit price-hurdle sensitivity across companies")
     scenario_parser = commands.add_parser("scenario", help="Calculate a custom price-hurdle sensitivity for one company")
     scenario_parser.add_argument("ticker")
@@ -990,6 +1297,8 @@ def main(argv=None):
             universe(desk, args.json)
         elif args.command == "company":
             company(desk, args.ticker, args.json)
+        elif args.command == "dossier":
+            dossier(desk, args.ticker, args.json)
         elif args.command == "compare":
             compare(desk, args.terminal_pe, args.share_factor, args.years, args.return_rate, args.sort, args.json)
         elif args.command == "scenario":

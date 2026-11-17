@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "ticker": "LITE",
+  "company": "Lumentum Holdings Inc.",
+  "as_of": "2026-11-17",
+  "security_state": {
+    "mode": "pending_all_stock_merger",
+    "acquirer": "Marvell Technology, Inc.",
+    "acquirer_ticker": "MRVL",
+    "primary_question": "What is 4.5 MRVL shares worth at closing, and what is the probability, timing and path to closing?",
+    "standalone_analysis_role": "Counterfactual downside support and break-case analysis, not the primary valuation frame."
+  },
+  "executive_view": {
+    "summary": "Lumentum is now a fixed-ratio all-stock merger security with a valuable standalone photonics business underneath it. The transaction must be analyzed before the operating company.",
+    "why_the_old_screen_is_wrong": "A standalone terminal-EPS hurdle ignores that each eligible LITE common share is contractually due to convert into 4.5 MRVL common shares if the transaction closes.",
+    "decision_frame": "Separate four questions: transaction completion, MRVL value at closing, time to closing, and LITE standalone value if the deal fails.",
+    "boundary": "This dossier records sourced facts, company claims and labeled inferences. It does not assign a deal probability, price target or recommendation."
+  },
+  "transaction": {
+    "announcement_date": "2026-11-01",
+    "form_8k_filed": "2026-11-02",
+    "consideration_type": "fixed_ratio_all_stock",
+    "exchange_ratio": 4.5,
+    "cash_component_per_share": 0.0,
+    "collar": false,
+    "expected_close_company_statement": "First half of calendar 2028",
+    "initial_outside_date": "2027-11-01",
+    "possible_regulatory_extensions": [
+      "2028-02-01",
+      "2028-05-01",
+      "2028-08-01"
+    ],
+    "closing_conditions": [
+      "Lumentum stockholder adoption of the merger agreement",
+      "Marvell stockholder approval of the share issuance and charter amendment",
+      "HSR waiting-period expiration or termination and other required regulatory approvals",
+      "Form S-4 effectiveness",
+      "Nasdaq authorization for listing the merger shares",
+      "No specified legal restraint or material adverse effect",
+      "Material performance of both parties' obligations"
+    ],
+    "termination_fees_usd": {
+      "lumentum_certain_circumstances": 2900000000,
+      "marvell_certain_circumstances": 5800000000,
+      "marvell_specified_regulatory_failure": 3200000000
+    },
+    "combined_ownership_company_estimate": {
+      "existing_marvell_holders_percent": 67,
+      "existing_lumentum_holders_percent": 33
+    },
+    "company_claims": [
+      "More than $1 billion of run-rate synergies, primarily from cost of goods sold",
+      "Non-GAAP EPS accretion in the first full year after closing"
+    ],
+    "dated_prices": {
+      "observed_at": "2026-11-16T21:00:00Z",
+      "currency": "USD",
+      "lite": 546.0,
+      "mrvl": 145.36,
+      "lite_source": "AutoNext single-provider checked quote retained in the 2026-11-17 desk",
+      "mrvl_source": "StockAnalysis closing quote; secondary source requiring independent reconciliation before a decision"
+    }
+  },
+  "three_clocks": {
+    "discovery": {
+      "date": "2026-11-01",
+      "event": "Definitive merger agreement signed",
+      "meaning": "The security changed from a primarily standalone operating-company exposure to a fixed-ratio claim on MRVL, subject to closing."
+    },
+    "recognition": [
+      {
+        "window": "2026-12-01T21:30:00Z",
+        "event": "Marvell fiscal Q3 2027 results and conference call",
+        "why_it_matters": "MRVL price directly changes the value of the 4.5-share consideration."
+      },
+      {
+        "window": "Unscheduled as of dossier date",
+        "event": "Form S-4 filing and SEC effectiveness",
+        "why_it_matters": "The filing should expose transaction mechanics, risk factors, financial information and the path to the shareholder votes."
+      },
+      {
+        "window": "Unscheduled as of dossier date",
+        "event": "Marvell and Lumentum shareholder votes",
+        "why_it_matters": "Both approvals are closing conditions."
+      },
+      {
+        "window": "Through expected H1 2028 close",
+        "event": "US and foreign regulatory clearances",
+        "why_it_matters": "Regulatory clearance and any remedy burden are central to completion risk."
+      }
+    ],
+    "monetisation": {
+      "window": "After closing; company targets H1 2028",
+      "event": "LITE shares convert into MRVL shares and integration begins",
+      "meaning": "Synergies and product co-design matter after closing, but the market can reprice the claim at each earlier recognition event."
+    }
+  },
+  "capability_stack": [
+    {
+      "layer": "Research and device physics",
+      "lumentum_capability": "Indium phosphide, VCSEL, EML and MEMS optical-device expertise",
+      "evidence_status": "Operating capability described in filings and product material"
+    },
+    {
+      "layer": "Technology and manufacturing",
+      "lumentum_capability": "High-power and continuous-wave lasers, six-inch InP manufacturing expansion and high-volume photonics packaging",
+      "evidence_status": "Facility and manufacturing plans are disclosed; future yield and economics remain unproven"
+    },
+    {
+      "layer": "Products",
+      "lumentum_capability": "800G/1.6T transceivers, modulated lasers, optical circuit switches and related components",
+      "evidence_status": "Shipping product portfolio; individual product economics are not fully disclosed"
+    },
+    {
+      "layer": "Distribution and qualification",
+      "lumentum_capability": "Hyperscaler relationships, NVIDIA partnership, design wins and multiyear purchase commitments",
+      "evidence_status": "Company-disclosed commitments and wins; customer concentration is material"
+    },
+    {
+      "layer": "Combined architecture if the deal closes",
+      "lumentum_capability": "Lumentum photonics plus Marvell DSPs, TIAs, drivers, ASICs, silicon photonics and packaging",
+      "evidence_status": "Strategic rationale and future-state company claim, not a demonstrated combined result"
+    }
+  ],
+  "operating_evidence": [
+    {
+      "period": "FY2027 Q1",
+      "fact": "Revenue was $1.2626 billion; GAAP diluted EPS was $3.54; non-GAAP diluted EPS was $4.57.",
+      "classification": "reported_result"
+    },
+    {
+      "period": "FY2027 Q2 guidance",
+      "fact": "Revenue guidance was $1.575-$1.625 billion and issuer-defined non-GAAP diluted EPS guidance was $5.90-$6.20.",
+      "classification": "management_guidance_not_forecast"
+    },
+    {
+      "period": "FY2027 Q1",
+      "fact": "Two end customers represented 37% and 11% of revenue.",
+      "classification": "reported_risk"
+    },
+    {
+      "period": "FY2027 Q1",
+      "fact": "Optical circuit switch revenue exceeded $108 million; management disclosed two NPO/CPO wins and said the second carried purchase commitments above $5 billion.",
+      "classification": "reported_result_and_company_claim"
+    },
+    {
+      "period": "March 2026",
+      "fact": "NVIDIA announced a $2 billion investment and a nonexclusive multiyear partnership that included a multibillion purchase commitment and future capacity rights.",
+      "classification": "announced_contractual_relationship"
+    }
+  ],
+  "strategic_logic": {
+    "physical_bottleneck": "As AI-cluster bandwidth rises, copper reach and power efficiency deteriorate, pushing optical links closer to compute and switching.",
+    "reinforcement_loop": "Device physics enables lasers and switches; manufacturing enables qualified volume; modules and systems make the capability usable; hyperscaler distribution creates learning and scale; the Marvell combination would add electronic co-design.",
+    "value_capture_question": "Does vertical integration improve performance and margins enough to outweigh integration cost, regulatory remedies and possible customer-neutrality concerns?",
+    "labeled_inference": "Some customers may prefer merchant laser or module suppliers that are not vertically integrated competitors. This is a diligence hypothesis, not a disclosed customer decision."
+  },
+  "competitive_map": [
+    {
+      "company": "Coherent",
+      "position": "Direct optical-component, transceiver, laser and OCS competitor across InP, silicon photonics and VCSEL technologies."
+    },
+    {
+      "company": "Broadcom",
+      "position": "Vertically integrated switching-silicon and co-packaged-optics competitor; architectural threat to the combined Marvell-Lumentum stack."
+    },
+    {
+      "company": "Cisco and NVIDIA USFP ecosystem",
+      "position": "Pluggable optics path that may extend the life of modular architectures and alter the timing of CPO adoption."
+    },
+    {
+      "company": "Ayar Labs and optical-I/O entrants",
+      "position": "Emerging architectures that may move the optical boundary and change which layer captures value."
+    }
+  ],
+  "leadership": {
+    "lumentum_ceo": "Michael Hurlston",
+    "assessment": "A hybrid technical-commercial operator: electrical-engineering training, prior Finisar CEO experience and Broadcom general-management/sales leadership.",
+    "post_close": "Marvell CEO Matt Murphy is expected to remain CEO and chair; three Lumentum-designated directors are to join the Marvell board.",
+    "evidence_boundary": "No independent employee-sentiment conclusion is made from company-controlled communications."
+  },
+  "scenarios": [
+    {
+      "name": "Deal closes on stated terms",
+      "mechanics": "Each eligible LITE common share converts into 4.5 MRVL common shares, plus cash instead of fractional shares.",
+      "dominant_variables": ["MRVL price at closing", "time to closing", "opportunity cost", "tax and hedging constraints for the investor"]
+    },
+    {
+      "name": "Deal is delayed",
+      "mechanics": "The fixed-ratio claim remains outstanding while the spread can widen and capital remains tied up.",
+      "dominant_variables": ["regulatory process", "remedy burden", "outside-date extensions", "both companies' operating performance"]
+    },
+    {
+      "name": "Deal breaks",
+      "mechanics": "LITE returns to a standalone valuation frame, subject to the break cause and any applicable termination fee.",
+      "dominant_variables": ["standalone earnings and cash flow", "customer concentration", "capex and manufacturing execution", "which termination fee, if any, is payable"]
+    }
+  ],
+  "disconfirmers": [
+    "A filing or amendment changes the 4.5 exchange ratio or other material economics.",
+    "Regulators require remedies that materially damage the strategic or financial logic.",
+    "Either shareholder group rejects the required approval.",
+    "MRVL deteriorates enough that the fixed-ratio consideration no longer clears the investor's return hurdle.",
+    "Lumentum's AI-optics growth, margin or purchase commitments weaken enough to reduce break-case support.",
+    "Integration or customer-neutrality evidence contradicts the claimed cross-layer reinforcement."
+  ],
+  "open_questions": [
+    "Has the Form S-4 been filed or declared effective since this dossier's as-of date?",
+    "Which foreign jurisdictions require approval and what remedy thresholds apply?",
+    "What standalone value range is defensible using cash flow, capex, dilution and normalized margins rather than one-quarter EPS?",
+    "How much of the disclosed purchase-commitment value is cancellable, capacity-right based or subject to qualification milestones?",
+    "How should MRVL be valued at the expected closing date under multiple operating and integration outcomes?",
+    "Can the quoted spread be independently reconciled across two licensed price sources before any decision?"
+  ],
+  "sources": [
+    {
+      "id": "lite-merger-8k",
+      "title": "Lumentum Form 8-K announcing the definitive merger agreement",
+      "url": "https://www.sec.gov/Archives/edgar/data/1633978/000119312526442758/d163169d8k.htm",
+      "type": "primary_filing"
+    },
+    {
+      "id": "mrvl-merger-8k",
+      "title": "Marvell Form 8-K announcing the definitive merger agreement",
+      "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001193125-26-442717/d352474d8k.htm",
+      "type": "primary_filing"
+    },
+    {
+      "id": "merger-agreement",
+      "title": "Agreement and Plan of Merger",
+      "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001193125-26-442717/d352474dex21.htm",
+      "type": "primary_contract"
+    },
+    {
+      "id": "merger-presentation",
+      "title": "Marvell and Lumentum combination investor presentation",
+      "url": "https://investor.marvell.com/_assets/_cd374c2dc2b315cc33f74eeebf563db7/marvell/db/3849/35441/description/marvell-lumentum-combine-investor-presentation-110226.pdf",
+      "type": "company_presentation"
+    },
+    {
+      "id": "lite-q1-fy27",
+      "title": "Lumentum fiscal Q1 2027 results",
+      "url": "https://www.investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-First-Quarter-of-Fiscal-Year-2027-Financial-Results/default.aspx",
+      "type": "company_release"
+    },
+    {
+      "id": "lite-q1-10q",
+      "title": "Lumentum fiscal Q1 2027 Form 10-Q",
+      "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828026069615/lite-20260926.htm",
+      "type": "primary_filing"
+    },
+    {
+      "id": "lite-fy26-10k",
+      "title": "Lumentum fiscal 2026 Form 10-K",
+      "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828026057358/lite-20260627.htm",
+      "type": "primary_filing"
+    },
+    {
+      "id": "nvidia-partnership",
+      "title": "NVIDIA and Lumentum strategic partnership announcement",
+      "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/NVIDIA-Announces-Strategic-Partnership-With-Lumentum-to-Develop-State-of-the-Art-Optics-Technology/default.aspx",
+      "type": "company_release"
+    },
+    {
+      "id": "greensboro-facility",
+      "title": "Lumentum US InP manufacturing facility announcement",
+      "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+      "type": "company_release"
+    },
+    {
+      "id": "ocp-ocs-project",
+      "title": "Open Compute Project optical circuit switching project",
+      "url": "https://www.opencompute.org/index.php/blog/the-open-compute-project-announces-new-optical-circuit-switching-ocs-project",
+      "type": "industry_primary"
+    },
+    {
+      "id": "mrvl-q3-call",
+      "title": "Marvell fiscal Q3 2027 results conference-call announcement",
+      "url": "https://investor.marvell.com/news-events/press-releases/detail/1041/marvell-technology-inc-announces-conference-call-to-review-third-quarter-of-fiscal-year-2027-financial-results",
+      "type": "company_release"
+    },
+    {
+      "id": "coherent-competition",
+      "title": "Coherent next-generation pluggable technology demonstration",
+      "url": "https://ir.coherent.com/news-releases/news-release-details/coherent-demonstrates-technologies-next-generation-pluggable",
+      "type": "competitor_release"
+    },
+    {
+      "id": "broadcom-cpo",
+      "title": "Broadcom co-packaged optics product overview",
+      "url": "https://www.broadcom.com/info/optics/cpo",
+      "type": "competitor_product_material"
+    }
+  ]
+}

@@ -64,6 +64,15 @@ class ResearchCliTests(unittest.TestCase):
         self.assertAlmostEqual(result["required_total_earnings_per_current_share"], 7.730448)
         self.assertEqual(result["status"], "scenario_not_forecast")
 
+    def test_lite_dossier_uses_fixed_ratio_merger_math(self):
+        dossier = cli.load_dossier("LITE")
+        result = cli.merger_math(dossier)
+        self.assertEqual(dossier["security_state"]["mode"], "pending_all_stock_merger")
+        self.assertEqual(result["exchange_ratio"], 4.5)
+        self.assertAlmostEqual(result["implied_consideration"], 654.12)
+        self.assertAlmostEqual(result["gross_spread_percent"], 654.12 / 546 - 1)
+        self.assertAlmostEqual(result["mrvl_break_even_for_lite_price"], 546 / 4.5)
+
     def test_outlook_and_normalized_hurdle(self):
         run = cli.Desk(self.desk).company("TEST")["run"]
         outlook = cli.management_outlook(run)
@@ -114,9 +123,22 @@ class ResearchCliTests(unittest.TestCase):
             ["--desk", str(self.desk), "compare"],
             ["--desk", str(self.desk), "scenario", "TEST", "--terminal-pe", "20"],
             ["--desk", str(self.desk), "search", "customer"],
+            ["--desk", str(self.desk), "dossier", "LITE"],
         ):
             with redirect_stdout(io.StringIO()):
                 self.assertEqual(cli.main(arguments), 0)
+
+    def test_lite_is_excluded_from_standalone_compare(self):
+        desk = cli.Desk(self.desk)
+        lite = json.loads(json.dumps(desk.companies["TEST"]))
+        lite["run"]["security"].update(ticker="LITE", company="Lumentum Holdings Inc.")
+        desk.companies["LITE"] = lite
+        output = io.StringIO()
+        with redirect_stdout(output):
+            cli.compare(desk, 25, 1, 5, 0.10, "ticker")
+        rendered = output.getvalue()
+        self.assertIn("CORPORATE ACTION", rendered)
+        self.assertIn("run dossier LITE", rendered)
 
     def test_terminal_output_surfaces_decision_context(self):
         desk = cli.Desk(self.desk)
@@ -144,6 +166,20 @@ class ResearchCliTests(unittest.TestCase):
         self.assertIn("Current management outlook", company_text)
         self.assertIn("Normalized price hurdle", company_text)
         self.assertEqual(len(list((vault / "Snapshots").rglob("*.md"))), 1)
+
+    def test_obsidian_exports_lite_transaction_dossier(self):
+        desk = cli.Desk(self.desk)
+        lite = json.loads(json.dumps(desk.companies["TEST"]))
+        lite["run"]["security"].update(ticker="LITE", company="Lumentum Holdings Inc.")
+        desk.companies["LITE"] = lite
+        vault = Path(self.temp.name) / "vault-dossier" / "AutoNext"
+        with redirect_stdout(io.StringIO()):
+            cli.export_obsidian(desk, vault)
+        dossier_text = (vault / "Dossiers" / "LITE.md").read_text(encoding="utf-8")
+        company_text = (vault / "Companies" / "LITE.md").read_text(encoding="utf-8")
+        self.assertIn("Fixed-ratio transaction math", dossier_text)
+        self.assertIn("4.500 MRVL / LITE", dossier_text)
+        self.assertIn("Dossiers/LITE", company_text)
 
     def test_generated_export_refuses_user_owned_company_note(self):
         desk = cli.Desk(self.desk)
